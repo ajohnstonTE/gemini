@@ -1,34 +1,62 @@
 package com.techempower.transaction;
 
 import com.techempower.util.Identifiable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.model.InitializationError;
-import org.junit.runners.model.RunnerBuilder;
+import org.junit.jupiter.api.*;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import static org.junit.Assert.*;
-import static com.techempower.transaction.TransactionTest.*;
+import java.sql.*;
+import java.util.Date;
 
-@RunWith(TransactionTest.class)
-@Suite.SuiteClasses({
-    begin.class,
-    commit.class,
-    rollback.class
-})
-public class TransactionTest extends Suite
+import static org.junit.jupiter.api.Assertions.*;
+
+@Testcontainers
+public class TransactionTest
 {
-  public TransactionTest(Class<?> klass, RunnerBuilder builder) throws InitializationError
+  @Container
+  public static MySQLContainer container = new MySQLContainer();
+
+  void createTable()
+      throws Exception
   {
-    super(klass, builder);
+    String jdbcUrl = container.getJdbcUrl();
+    String username = container.getUsername();
+    String password = container.getPassword();
+    try (Connection conn = DriverManager
+        .getConnection(jdbcUrl, username, password))
+    {
+      conn.createStatement().execute(
+          "CREATE TABLE `house` ("
+              + " `id` INTEGER AUTO_INCREMENT PRIMARY KEY,"
+              + " `cityId` INTEGER NOT NULL,"
+              + " `owner` VARCHAR(255) NOT NULL,"
+              + " `dog` VARCHAR(255),"
+              + " UNIQUE KEY `unique_city_and_owner` (`cityId`, `owner`)"
+              + ")");
+    }
+  }
+
+  void dropTable()
+      throws Exception
+  {
+    String jdbcUrl = container.getJdbcUrl();
+    String username = container.getUsername();
+    String password = container.getPassword();
+
+    try (Connection conn = DriverManager
+        .getConnection(jdbcUrl, username, password))
+    {
+      conn.createStatement().execute("DROP TABLE `house`;");
+    }
   }
 
   static class House implements Identifiable
   {
     private TransactionalProperty<Long> id = new TransactionalProperty<>(0L);
-    private TransactionalProperty<Integer> cityId  = new TransactionalProperty<>(0);
-    private TransactionalProperty<String> dog = new TransactionalProperty<>();
+    private TransactionalProperty<Integer> cityId = new TransactionalProperty<>(0);
     private TransactionalProperty<String> owner = new TransactionalProperty<>();
+    private TransactionalProperty<String> dog = new TransactionalProperty<>();
 
     public House()
     {
@@ -56,6 +84,12 @@ public class TransactionTest extends Suite
       return cityId.get();
     }
 
+    public House setCityId(int cityId)
+    {
+      this.cityId.set(cityId);
+      return this;
+    }
+
     public String getOwner()
     {
       return owner.get();
@@ -64,12 +98,6 @@ public class TransactionTest extends Suite
     public House setOwner(String owner)
     {
       this.owner.set(owner);
-      return this;
-    }
-
-    public House setCityId(int cityId)
-    {
-      this.cityId.set(cityId);
       return this;
     }
 
@@ -85,7 +113,8 @@ public class TransactionTest extends Suite
     }
   }
 
-  public static class begin
+  @Nested
+  public class begin
   {
     @Test
     public void shouldCorrectlyManageTheThreadLocalUnderNormalCircumstances()
@@ -116,9 +145,10 @@ public class TransactionTest extends Suite
 
   }
 
-  public static class rollback
+  @Nested
+  public class rollback
   {
-    static class TestException extends RuntimeException
+    class TestException extends RuntimeException
     {
     }
 
@@ -147,7 +177,8 @@ public class TransactionTest extends Suite
     }
   }
 
-  public static class commit
+  @Nested
+  public class commit
   {
     @Test
     public void test()
@@ -170,5 +201,142 @@ public class TransactionTest extends Suite
       }
     }
 
+  }
+
+  @Nested
+  @DisplayName("should work correctly with the database")
+  public class sql
+  {
+    @BeforeEach
+    public void setUpEach()
+        throws Exception
+    {
+      TransactionTest.this.createTable();
+    }
+
+    @AfterEach
+    public void tearDownEach()
+        throws Exception
+    {
+      TransactionTest.this.dropTable();
+    }
+
+    @Test
+    @DisplayName("when in normal conditions")
+    public void normalConditions()
+        throws Exception
+    {
+      String jdbcUrl = container.getJdbcUrl();
+      String username = container.getUsername();
+      String password = container.getPassword();
+      try (Connection conn = DriverManager
+          .getConnection(jdbcUrl, username, password))
+      {
+        try
+        {
+          conn.setAutoCommit(false);
+          try (PreparedStatement statement = conn.prepareStatement(
+              "INSERT INTO `house` " +
+                  "(`cityId`, `owner`, `dog`) " +
+                  "VALUES (?, ?, ?)"))
+          {
+            attachArguments(statement, 10, "Sally", "Tails");
+            statement.executeUpdate();
+          }
+          conn.commit();
+        }
+        catch (Exception e)
+        {
+          conn.rollback();
+        }
+      }
+      finally
+      {
+        try (Connection conn = DriverManager
+            .getConnection(jdbcUrl, username, password);
+             PreparedStatement statement = conn.prepareStatement(
+                 "SELECT COUNT(*) FROM `house`"))
+        {
+          ResultSet resultSet = statement.executeQuery();
+          assertTrue(resultSet.next());
+          int count = resultSet.getInt(1);
+          assertEquals(1, count);
+        }
+      }
+    }
+
+    @Test
+    @DisplayName("when a sql exception is thrown by rolling back the changes")
+    public void sqlExceptionThrown()
+        throws Exception
+    {
+      String jdbcUrl = container.getJdbcUrl();
+      String username = container.getUsername();
+      String password = container.getPassword();
+      try (Connection conn = DriverManager
+          .getConnection(jdbcUrl, username, password))
+      {
+        try
+        {
+          conn.setAutoCommit(false);
+          try (PreparedStatement statement = conn.prepareStatement(
+              "INSERT INTO `house` " +
+                  "(`cityId`, `owner`, `dog`) " +
+                  "VALUES (?, ?, ?)"))
+          {
+            attachArguments(statement, 10, "Sally", "Tails");
+            statement.executeUpdate();
+          }
+          try (PreparedStatement statement = conn.prepareStatement(
+              "INSERT INTO `house` " +
+                  "(`cityId`, `owner`, `dog`) " +
+                  "VALUES (?, ?, ?)"))
+          {
+            attachArguments(statement, 10, "Sally", "Whales");
+            statement.executeUpdate();
+          }
+          conn.commit();
+        }
+        catch (Exception e)
+        {
+          conn.rollback();
+        }
+      }
+      finally
+      {
+        try (Connection conn = DriverManager
+            .getConnection(jdbcUrl, username, password);
+             PreparedStatement statement = conn.prepareStatement(
+                 "SELECT COUNT(*) FROM `house`"))
+        {
+          ResultSet resultSet = statement.executeQuery();
+          assertTrue(resultSet.next());
+          int count = resultSet.getInt(1);
+          assertEquals(0, count);
+        }
+      }
+    }
+
+    /**
+     * Attach an arbitrary list of arguments to a PreparedStatement.
+     * <p>
+     * Copied from EntityGroup for now.
+     */
+    private void attachArguments(PreparedStatement statement, Object... arguments)
+        throws SQLException
+    {
+      int index = 1;
+      for (Object argument : arguments)
+      {
+        if (argument instanceof Date)
+        {
+          statement.setDate(index++, new java.sql.Date(((Date) argument).getTime()));
+        }
+        else
+        {
+          statement.setObject(index++, argument);
+        }
+      }
+    }
   }
 }
