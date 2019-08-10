@@ -1,0 +1,327 @@
+package com.techempower.cache;
+
+import com.techempower.cache.annotation.Indexed;
+import com.techempower.util.Identifiable;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class EntityStoreTest
+{
+  @RegisterExtension
+  public static EntityStoreTestResource entityStoreTestResource = EntityStoreTestResource.builder()
+      .register(CacheGroup.of(House.class).maker(House::new))
+      .register(CacheGroup.of(Doctor.class).maker(Doctor::new))
+      .register(CacheGroup.of(Lawyer.class).maker(Lawyer::new))
+      .setSqlScripts("sql/standard")
+      .build();
+
+  static class House implements Identifiable
+  {
+    private long id;
+    private int cityId;
+    private String dog;
+    private String owner;
+
+    public House()
+    {
+    }
+
+    public House(long id)
+    {
+      setId(id);
+    }
+
+    @Override
+    public long getId()
+    {
+      return id;
+    }
+
+    @Override
+    public void setId(long id)
+    {
+      this.id = id;
+    }
+
+    public int getCityId()
+    {
+      return cityId;
+    }
+
+    public String getOwner()
+    {
+      return owner;
+    }
+
+    public House setOwner(String owner)
+    {
+      this.owner = owner;
+      return this;
+    }
+
+    public House setCityId(int cityId)
+    {
+      this.cityId = cityId;
+      return this;
+    }
+
+    public String getDog()
+    {
+      return dog;
+    }
+
+    public House setDog(String dog)
+    {
+      this.dog = dog;
+      return this;
+    }
+  }
+
+  interface Person extends Identifiable
+  {
+    String getName();
+    
+    Person setName(String name);
+    
+    long getAge();
+    
+    Person setAge(long age);
+    
+    String getDog();
+    
+    Person setDog(String name);
+  }
+
+  @Indexed
+  static class Doctor implements Person
+  {
+    private long id;
+    private String name;
+    private long age;
+    private String dog;
+    private long numberOfLabCoats;
+
+    public Doctor()
+    {
+    }
+
+    public Doctor(long id)
+    {
+      this.id = id;
+    }
+
+    @Override
+    public long getId()
+    {
+      return id;
+    }
+
+    @Override
+    public void setId(long id)
+    {
+      this.id = id;
+    }
+
+    @Override
+    public String getName()
+    {
+      return name;
+    }
+
+    @Override
+    public Doctor setName(String name)
+    {
+      this.name = name;
+      return this;
+    }
+
+    @Override
+    public long getAge()
+    {
+      return age;
+    }
+
+    @Override
+    public Doctor setAge(long age)
+    {
+      this.age = age;
+      return this;
+    }
+
+    @Override
+    public String getDog()
+    {
+      return dog;
+    }
+
+    @Override
+    public Doctor setDog(String dog)
+    {
+      this.dog = dog;
+      return this;
+    }
+
+    public long getNumberOfLabCoats()
+    {
+      return numberOfLabCoats;
+    }
+
+    public Doctor setNumberOfLabCoats(long numberOfLabCoats)
+    {
+      this.numberOfLabCoats = numberOfLabCoats;
+      return this;
+    }
+  }
+
+  @Indexed
+  static class Lawyer implements Person
+  {
+    private long id;
+    private String name;
+    private long age;
+    private String dog;
+    private long numberOfSuits;
+
+    public Lawyer()
+    {
+    }
+
+    public Lawyer(long id)
+    {
+      this.id = id;
+    }
+
+    @Override
+    public long getId()
+    {
+      return id;
+    }
+
+    @Override
+    public void setId(long id)
+    {
+      this.id = id;
+    }
+
+    @Override
+    public String getName()
+    {
+      return name;
+    }
+
+    @Override
+    public Lawyer setName(String name)
+    {
+      this.name = name;
+      return this;
+    }
+
+    @Override
+    public long getAge()
+    {
+      return age;
+    }
+
+    @Override
+    public Lawyer setAge(long age)
+    {
+      this.age = age;
+      return this;
+    }
+
+    @Override
+    public String getDog()
+    {
+      return dog;
+    }
+
+    @Override
+    public Lawyer setDog(String dog)
+    {
+      this.dog = dog;
+      return this;
+    }
+
+    public long getNumberOfSuits()
+    {
+      return numberOfSuits;
+    }
+
+    public Lawyer setNumberOfSuits(long numberOfSuits)
+    {
+      this.numberOfSuits = numberOfSuits;
+      return this;
+    }
+  }
+
+  @DisplayName("Verify that the cache interacts with the database properly.")
+  @Test
+  void testBasicDbInteraction()
+      throws Exception
+  {
+    House house = new House()
+        .setCityId(10)
+        .setOwner("Sally")
+        .setDog("Tails");
+    store().put(house);
+    assertTrue(house.getId() != 0);
+  }
+
+  @DisplayName("Verify that the basic cache selectors work.")
+  @Test
+  void testBasicCacheSelectors()
+  {
+    List<Doctor> doctorsNamedMoe = store()
+        .select(Doctor.class)
+        .where(Doctor::getName, "getName", "Moe")
+        .list();
+    assertEquals(new HashSet<>(Arrays.asList(3L, 6L, 8L)), doctorsNamedMoe
+        .stream()
+        .map(Doctor::getId)
+        .collect(Collectors.toSet()));
+    List<Lawyer> lawyersWithOneOrTwoSuits = store()
+        .select(Lawyer.class)
+        .whereIn(Lawyer::getNumberOfSuits, "getNumberOfSuits", Arrays.asList(1L, 2L))
+        .list();
+    assertEquals(new HashSet<>(Arrays.asList(2L, 6L, 7L)), lawyersWithOneOrTwoSuits
+        .stream()
+        .map(Lawyer::getId)
+        .collect(Collectors.toSet()));
+  }
+
+  @DisplayName("Verify that multiple classes can be selected on.")
+  @Test
+  void testMultiClassSelector()
+  {
+    List<Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
+        .select(Arrays.asList(Doctor.class, Lawyer.class))
+        .where(Person::getName, "getName", "Moe")
+        .whereIn(Person::getDog, "getDog", Arrays.asList(null, "Poppy"))
+        .list();
+    assertEquals(new HashSet<>(Arrays.asList(3L, 8L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
+        .stream()
+        .filter(Doctor.class::isInstance)
+        .map(Person::getId)
+        .collect(Collectors.toSet()));
+    assertEquals(new HashSet<>(Arrays.asList(5L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
+        .stream()
+        .filter(Lawyer.class::isInstance)
+        .map(Person::getId)
+        .collect(Collectors.toSet()));
+  }
+
+  private EntityStore store()
+  {
+    return entityStoreTestResource.store;
+  }
+}

@@ -709,6 +709,14 @@ public class EntityStore
   }
 
   /**
+   * Return a builder-style cache accessor in the entity group.
+   */
+  public <T extends Identifiable> MultiEntitySelector<T> select(Collection<Class<? extends T>> types)
+  {
+    return new MultiEntitySelector<>(types, this);
+  }
+
+  /**
    * Return a collection of objects contained in the entity group based
    * on a method name value and object type.  Returns empty collection in the 
    * event of an error or if no objects cannot be found.
