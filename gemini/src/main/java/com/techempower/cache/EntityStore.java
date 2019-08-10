@@ -217,16 +217,80 @@ public class EntityStore
       }
     }
   }
-  
+
+  /**
+   * Are we caching all referenced method's values?  This is dependent on the
+   * value of {@code cacheMethodValues} and also whether or not each method
+   * has been annotated with {@code @Indexed} or {@code @NotIndexed}
+   * annotations. In order for the intersection to be indexed, <b>every</b>
+   * referenced method must be indexed.
+   *
+   * <p>{@code forceIndexedMethods} and {@code forceNotIndexedMethods} must be
+   * initialized for this class type before calling this.  This should be
+   * done when registering a cache group.
+   *
+   * @return true if this intersection has its values cached.  Returns false if
+   * this intersection does not have its values cached or this class type is
+   * not registered in the cache group.
+   */
+  protected <T extends Identifiable> boolean isIndexedInt(
+      FieldIntersection<T> fieldIntersection)
+  {
+    Class<T> type = fieldIntersection.getType();
+    // This is not a cached data entity, so immediately return false.
+    if (!groups.containsKey(type))
+    {
+      return false;
+    }
+
+    Boolean classIndexed = indexedAnnotatedClasses.get(type);
+    // The class wasn't specifically annotated, so use the global cacheMethodValues
+    // value.
+    if (classIndexed == null)
+    {
+      classIndexed = cacheMethodValues;
+    }
+
+    Map<String, Boolean> indexedAnnotatedMethods = this
+        .indexedAnnotatedMethods.get(type);
+    for(String method : fieldIntersection.getMethodNames())
+    {
+      Boolean methodIndexed = indexedAnnotatedMethods.get(method);
+      // If we are caching method values by default, then we only need to check
+      // if this method was explicitly marked as @NotIndexed.
+      if (classIndexed)
+      {
+        // This will always return true unless the method was specifically
+        // annotated and explicitly marked as @NotIndexed.
+        if (!(methodIndexed == null || methodIndexed))
+        {
+          return false;
+        }
+      }
+      // If we are not caching method values by default, then we only need to check
+      // if this method was explicitly marked as @Indexed.
+      else
+      {
+        // This method was specifically annotated and explicitly marked as
+        // @Indexed.
+        if (!(methodIndexed != null && methodIndexed))
+        {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   /**
    * Are we caching this method's values?  This is dependent on the value of
    * {@code cacheMethodValues} and also whether or not the method has been
    * annotated with {@code @Indexed} or {@code @NotIndexed} annotations.
-   * 
+   *
    * <p>{@code forceIndexedMethods} and {@code forceNotIndexedMethods} must be
    * initialized for this class type before calling this.  This should be
    * done when registering a cache group.
-   * 
+   *
    * @return true if this method has its values cached.  Returns false if this
    * method does not have its values cached or this class type is not registered
    * in the cache group.
@@ -637,6 +701,14 @@ public class EntityStore
   }
 
   /**
+   * Return a builder-style cache accessor in the entity group.
+   */
+  public <T extends Identifiable> EntitySelector<T> select(Class<T> type)
+  {
+    return new EntitySelector<>(type, this);
+  }
+
+  /**
    * Return a collection of objects contained in the entity group based
    * on a method name value and object type.  Returns empty collection in the 
    * event of an error or if no objects cannot be found.
@@ -654,6 +726,102 @@ public class EntityStore
     }
     
     return list(type, methodName, NO_PARAMETERS, value);
+  }
+
+  /**
+   * A var args version of getObjects that returns an intersection (not a
+   * union!) of multiple method name/value pairs. Basically, this allows you
+   * to lookup entity objects based on multiple method values, instead of a
+   * singular value. A real world example:
+   * Suppose we want to grab all Foo's with the following attributes:
+   * <ul>
+   * <li>Enabled set to true</li>
+   * <li>BarTypeId set to 1</li>
+   * </ul>
+   * The following code would accomplish the above:
+   * <pre>
+   * {@code
+   *  list(Foo.class, "isEnabled", true, "getBarTypeId", 1);
+   * }
+   * </pre>
+   * Returns empty collection in the event of an error or if no objects
+   * cannot be found.
+   *
+   * @param methodNameThenValuePairs must be pairs of method name then value
+   *                                 objects. If the length of the objects
+   *                                 passed in is not a multiple of two, an
+   *                                 IllegalArgumentException will be thrown.
+   */
+  public <T extends Identifiable> List<T> list(Class<T> type,
+                                               String methodName,
+                                               Object value,
+                                               Object... methodNameThenValuePairs)
+  {
+    return list(new FieldIntersection<>(type, methodName, value,
+        methodNameThenValuePairs));
+  }
+
+  @SuppressWarnings("unchecked")
+  <T extends Identifiable> List<T> list(FieldIntersection<T> fieldIntersection)
+  {
+    Class<T> type = fieldIntersection.getType();
+    if (isIndexedInt(fieldIntersection))
+    {
+      MethodValueCache<T> methodValueCache = (MethodValueCache<T>)this.methodValueCaches
+          .get(type);
+      if (methodValueCache != null)
+      {
+        return methodValueCache.getObjectsInt(fieldIntersection);
+      }
+    }
+    // Not indexed. Get the intersection manually.
+    Map<String, Method> mapMethodNameToMethods = new HashMap<>();
+    final List<T> list = list(type);
+    final List<T> toReturn = new ArrayList<>();
+    // Store a reference in case an exception is thrown.
+    String currentMethodName = null;
+    try
+    {
+      List<String> methodNames = fieldIntersection.getMethodNames();
+      List<Object> values = fieldIntersection.getValues();
+      for (T object : list)
+      {
+        boolean matching = true;
+        for (int i = 0; matching && i < methodNames.size(); i++)
+        {
+          String methodName = methodNames.get(i);
+          currentMethodName = methodName;
+          Object value = values.get(i);
+          Method method = mapMethodNameToMethods.get(methodName);
+          if (method == null)
+          {
+            method = object.getClass().getMethod(methodName, NO_PARAMETERS);
+            mapMethodNameToMethods.put(methodName, method);
+          }
+          // Check the value of the field within this object.
+          final Object objValue = method.invoke(object, NO_VALUES);
+
+          if (value instanceof WhereInSet)
+          {
+            matching = matching && ((WhereInSet)value).hasValue(objValue);
+          }
+          else
+          {
+            matching = matching && Objects.equals(value, objValue);
+          }
+        }
+        if (matching)
+        {
+          toReturn.add(object);
+        }
+      }
+    }
+    catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e)
+    {
+      throw new ControllerError(ERROR_METHOD_ACCESS + currentMethodName, e);
+    }
+
+    return toReturn;
   }
 
   /**
@@ -1018,6 +1186,91 @@ public class EntityStore
     catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e)
     {
       throw new ControllerError(ERROR_METHOD_ACCESS + methodName, e);
+    }
+
+    // If we get here, return null.
+    return null;
+  }
+
+  /**
+   * Return a particular IdentifiableObject contained in the entity group
+   * based on a set of method names and expected values.  Returns null in the
+   * event of an error or if the entity group cannot be found.
+   *
+   * @param methodName the method to call
+   * @param value the value on which to search
+   * @param methodNameThenValuePairs must be pairs of method name then value
+   *                                 objects. If the length of the objects
+   *                                 passed in is not a multiple of two, an
+   *                                 IllegalArgumentException will be thrown.
+   */
+  @SuppressWarnings("unchecked")
+  public <T extends Identifiable> T get(Class<T> type,
+                                        String methodName,
+                                        Object value,
+                                        Object... methodNameThenValuePairs)
+  {
+    return get(new FieldIntersection<>(type, methodName, value,
+        methodNameThenValuePairs));
+  }
+
+  @SuppressWarnings("unchecked")
+  <T extends Identifiable> T get(FieldIntersection<T> fieldIntersection)
+  {
+    Class<T> type = fieldIntersection.getType();
+    if (isIndexedInt(fieldIntersection))
+    {
+      MethodValueCache<T> methodValueCache = (MethodValueCache<T>)this.methodValueCaches
+          .get(type);
+      if (methodValueCache != null)
+      {
+        return methodValueCache.getObjectInt(fieldIntersection);
+      }
+    }
+    // Not indexed. Get the intersection manually.
+    Map<String, Method> mapMethodNameToMethods = new HashMap<>();
+    final List<T> list = list(type);
+    // Store a reference in case an exception is thrown.
+    String currentMethodName = null;
+
+    try
+    {
+      List<String> methodNames = fieldIntersection.getMethodNames();
+      List<Object> values = fieldIntersection.getValues();
+      for (T object : list)
+      {
+        boolean matching = true;
+        for (int i = 0; matching && i < methodNames.size(); i++)
+        {
+          String methodName = methodNames.get(i);
+          currentMethodName = methodName;
+          Object value = values.get(i);
+          Method method = mapMethodNameToMethods.get(methodName);
+          if (method == null)
+          {
+            method = object.getClass().getMethod(methodName, NO_PARAMETERS);
+            mapMethodNameToMethods.put(methodName, method);
+          }
+          // Check the value of the field within this object.
+          final Object objValue = method.invoke(object, NO_VALUES);
+          if (value instanceof WhereInSet)
+          {
+            matching = matching && ((WhereInSet)value).hasValue(objValue);
+          }
+          else
+          {
+            matching = matching && Objects.equals(value, objValue);
+          }
+        }
+        if (matching)
+        {
+          return object;
+        }
+      }
+    }
+    catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e)
+    {
+      throw new ControllerError(ERROR_METHOD_ACCESS + currentMethodName, e);
     }
 
     // If we get here, return null.
