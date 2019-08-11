@@ -6,9 +6,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,15 +88,15 @@ class EntityStoreTest
   interface Person extends Identifiable
   {
     String getName();
-    
+
     Person setName(String name);
-    
+
     long getAge();
-    
+
     Person setAge(long age);
-    
+
     String getDog();
-    
+
     Person setDog(String name);
   }
 
@@ -291,7 +289,7 @@ class EntityStoreTest
         .collect(Collectors.toSet()));
     List<Lawyer> lawyersWithOneOrTwoSuits = store()
         .select(Lawyer.class)
-        .whereIn(Lawyer::getNumberOfSuits, "getNumberOfSuits", Arrays.asList(1L, 2L))
+        .where(Lawyer::getNumberOfSuits, "getNumberOfSuits").in(Arrays.asList(1L, 2L))
         .list();
     assertEquals(new HashSet<>(Arrays.asList(2L, 6L, 7L)), lawyersWithOneOrTwoSuits
         .stream()
@@ -303,21 +301,31 @@ class EntityStoreTest
   @Test
   void testMultiClassSelector()
   {
-    List<Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
+    List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
         .where(Person::getName, "getName", "Moe")
-        .whereIn(Person::getDog, "getDog", Arrays.asList(null, "Poppy"))
+        .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .list();
+    Person personNamedMoeWithNoDogOrADogNamedPoppy = store()
+        .select(Arrays.asList(Doctor.class, Lawyer.class))
+        .where(Person::getName, "getName", "Moe")
+        .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
+        .get();
     assertEquals(new HashSet<>(Arrays.asList(3L, 8L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
         .stream()
         .filter(Doctor.class::isInstance)
         .map(Person::getId)
         .collect(Collectors.toSet()));
-    assertEquals(new HashSet<>(Arrays.asList(5L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
+    assertEquals(new HashSet<>(Collections.singletonList(5L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
         .stream()
         .filter(Lawyer.class::isInstance)
         .map(Person::getId)
         .collect(Collectors.toSet()));
+    boolean personIsOneOfTheDoctors = personNamedMoeWithNoDogOrADogNamedPoppy instanceof Doctor
+        && Arrays.asList(3L, 8L).contains(personNamedMoeWithNoDogOrADogNamedPoppy.getId());
+    boolean personIsOneOfTheLawyers = personNamedMoeWithNoDogOrADogNamedPoppy instanceof Lawyer
+        && 5L == personNamedMoeWithNoDogOrADogNamedPoppy.getId();
+    assertTrue(personIsOneOfTheDoctors || personIsOneOfTheLawyers);
   }
 
   private EntityStore store()

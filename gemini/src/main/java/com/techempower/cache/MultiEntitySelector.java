@@ -28,7 +28,7 @@ public class MultiEntitySelector<T extends Identifiable>
    * Adds the given method-value pair to the list to use when filtering the
    * objects retrieved by {@link #list()} and {@link #get()}.
    */
-  public MultiEntitySelector<T> where(String methodName, Object value)
+  MultiEntitySelector<T> where(String methodName, Object value)
   {
     this.methods.add(methodName);
     this.values.add(value);
@@ -39,33 +39,21 @@ public class MultiEntitySelector<T extends Identifiable>
    * Adds the given method-value pair to the list to use when filtering the
    * objects retrieved by {@link #list()} and {@link #get()}.
    */
-  public <S> MultiEntitySelector<T> where(Function<? super T, S> method, String methodName, S value)
+  public <S> MultiEntitySelector<T> where(Function<? super T, S> method,
+                                          String methodName,
+                                          S value)
   {
-    this.methods.add(methodName);
-    this.values.add(value);
-    return this;
+    return where(methodName, value);
   }
 
   /**
    * Adds the given method-value pair to the list to use when filtering the
    * objects retrieved by {@link #list()} and {@link #get()}.
    */
-  public MultiEntitySelector<T> whereIn(String methodName, Collection<?> values)
+  public <S> MultiEntityWhereChain<T, S> where(Function<? super T, S> method,
+                                               String methodName)
   {
-    this.methods.add(methodName);
-    this.values.add(new WhereInSet(values));
-    return this;
-  }
-
-  /**
-   * Adds the given method-value pair to the list to use when filtering the
-   * objects retrieved by {@link #list()} and {@link #get()}.
-   */
-  public <S> MultiEntitySelector<T> whereIn(Function<? super T, S> method, String methodName, Collection<S> values)
-  {
-    this.methods.add(methodName);
-    this.values.add(new WhereInSet(values));
-    return this;
+    return new MultiEntityWhereChain<>(this, methodName);
   }
 
   /**
