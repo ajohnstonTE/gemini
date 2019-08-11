@@ -307,7 +307,7 @@ class EntityStoreTest
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .list();
     List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy2 = store()
-        .selectAny(Person.class)
+        .selectAnySubclass(Person.class)
         .where(Person::getName, "getName", "Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .list();
