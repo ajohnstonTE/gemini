@@ -74,7 +74,6 @@ public class MultiEntitySelector<T extends Identifiable>
    *
    * @see #where(String, Object)
    */
-  @SuppressWarnings("unchecked")
   public T get()
   {
     if (methods.isEmpty())
@@ -94,7 +93,7 @@ public class MultiEntitySelector<T extends Identifiable>
     }
     for (Class<? extends T> type : types)
     {
-      T object = this.store.get(new FieldIntersection<>((Class<T>)type, methods, values));
+      T object = this.store.get(new FieldIntersection<>(type, methods, values));
       if (object != null)
       {
         return object;
@@ -109,7 +108,6 @@ public class MultiEntitySelector<T extends Identifiable>
    *
    * @see #where(String, Object)
    */
-  @SuppressWarnings("unchecked")
   public List<T> list()
   {
     List<T> toReturn = new ArrayList<>();
@@ -125,7 +123,7 @@ public class MultiEntitySelector<T extends Identifiable>
       for (Class<? extends T> type : types)
       {
         toReturn.addAll(this.store.list(
-            new FieldIntersection<>((Class<T>)type, methods, values)));
+            new FieldIntersection<>(type, methods, values)));
       }
     }
     return toReturn;
