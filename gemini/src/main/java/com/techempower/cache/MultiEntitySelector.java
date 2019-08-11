@@ -9,7 +9,9 @@ import java.util.function.Function;
 
 /**
  * This class is meant to help keep store accesses easy to read, by clearly
- * separating different method-value pairs into different method calls.
+ * separating different method-value pairs into different method calls. This is
+ * a variant of {@link EntitySelector} that is capable of performing selections
+ * on multiple entity groups at once.
  */
 public class MultiEntitySelector<T extends Identifiable>
 {
@@ -81,7 +83,8 @@ public class MultiEntitySelector<T extends Identifiable>
     }
     for (Class<? extends T> type : types)
     {
-      T object = this.store.get(new FieldIntersection<>(type, methods, values));
+      T object = this.store.get(
+          new FieldIntersection<>(type, methods, values));
       if (object != null)
       {
         return object;
