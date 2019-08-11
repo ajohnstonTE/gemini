@@ -301,12 +301,12 @@ class EntityStoreTest
   @Test
   void testMultiClassSelector()
   {
-    List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
+    List<Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
         .where(Person::getName, "getName", "Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .list();
-    List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy2 = store()
+    List<Person> peopleNamedMoeWithNoDogOrADogNamedPoppy2 = store()
         .selectAnySubclass(Person.class)
         .where(Person::getName, "getName", "Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
