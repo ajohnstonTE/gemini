@@ -306,12 +306,22 @@ class EntityStoreTest
         .where(Person::getName, "getName", "Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .list();
+    List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy2 = store()
+        .selectAny(Person.class)
+        .where(Person::getName, "getName", "Moe")
+        .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
+        .list();
     Person personNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
         .where(Person::getName, "getName", "Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .get();
     assertEquals(new HashSet<>(Arrays.asList(3L, 8L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
+        .stream()
+        .filter(Doctor.class::isInstance)
+        .map(Person::getId)
+        .collect(Collectors.toSet()));
+    assertEquals(new HashSet<>(Arrays.asList(3L, 8L)), peopleNamedMoeWithNoDogOrADogNamedPoppy2
         .stream()
         .filter(Doctor.class::isInstance)
         .map(Person::getId)
