@@ -100,14 +100,20 @@ class EntityStoreTest
     Person setDog(String name);
   }
 
+  interface Rich
+  {
+    long getSalary();
+  }
+
   @Indexed
-  static class Doctor implements Person
+  static class Doctor implements Person, Rich
   {
     private long id;
     private String name;
     private long age;
     private String dog;
     private long numberOfLabCoats;
+    private long salary;
 
     public Doctor()
     {
@@ -179,16 +185,29 @@ class EntityStoreTest
       this.numberOfLabCoats = numberOfLabCoats;
       return this;
     }
+
+    @Override
+    public long getSalary()
+    {
+      return salary;
+    }
+
+    public Doctor setSalary(long salary)
+    {
+      this.salary = salary;
+      return this;
+    }
   }
 
   @Indexed
-  static class Lawyer implements Person
+  static class Lawyer implements Person, Rich
   {
     private long id;
     private String name;
     private long age;
     private String dog;
     private long numberOfSuits;
+    private long salary;
 
     public Lawyer()
     {
@@ -260,6 +279,18 @@ class EntityStoreTest
       this.numberOfSuits = numberOfSuits;
       return this;
     }
+
+    @Override
+    public long getSalary()
+    {
+      return salary;
+    }
+
+    public Lawyer setSalary(long salary)
+    {
+      this.salary = salary;
+      return this;
+    }
   }
 
   @DisplayName("Verify that the cache interacts with the database properly.")
@@ -301,7 +332,7 @@ class EntityStoreTest
   @Test
   void testMultiClassSelector()
   {
-    List<Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
+    List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
         .where(Person::getName, "getName", "Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
@@ -316,6 +347,10 @@ class EntityStoreTest
         .where(Person::getName, "getName", "Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .get();
+    List<Rich> richPeople = store()
+        .selectAnySubclass(Rich.class)
+        .where(Rich::getSalary, "getSalary").in(Arrays.asList(405000L, 1000000L))
+        .list();
     assertEquals(new HashSet<>(Arrays.asList(3L, 8L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
         .stream()
         .filter(Doctor.class::isInstance)
@@ -329,6 +364,18 @@ class EntityStoreTest
     assertEquals(new HashSet<>(Collections.singletonList(5L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
         .stream()
         .filter(Lawyer.class::isInstance)
+        .map(Person::getId)
+        .collect(Collectors.toSet()));
+    assertEquals(new HashSet<>(Arrays.asList(2L, 4L, 9L)), richPeople
+        .stream()
+        .filter(Doctor.class::isInstance)
+        .map(Doctor.class::cast)
+        .map(Person::getId)
+        .collect(Collectors.toSet()));
+    assertEquals(new HashSet<>(Collections.singletonList(7L)), richPeople
+        .stream()
+        .filter(Lawyer.class::isInstance)
+        .map(Lawyer.class::cast)
         .map(Person::getId)
         .collect(Collectors.toSet()));
     boolean personIsOneOfTheDoctors = personNamedMoeWithNoDogOrADogNamedPoppy instanceof Doctor
