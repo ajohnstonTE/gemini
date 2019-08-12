@@ -312,7 +312,7 @@ class EntityStoreTest
   {
     List<Doctor> doctorsNamedMoe = store()
         .select(Doctor.class)
-        .where(Doctor::getName, "getName", "Moe")
+        .where(Doctor::getName, "getName").is("Moe")
         .list();
     assertEquals(new HashSet<>(Arrays.asList(3L, 6L, 8L)), doctorsNamedMoe
         .stream()
@@ -334,17 +334,17 @@ class EntityStoreTest
   {
     List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
-        .where(Person::getName, "getName", "Moe")
+        .where(Person::getName, "getName").is("Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .list();
     List<Person> peopleNamedMoeWithNoDogOrADogNamedPoppy2 = store()
         .selectAnySubclass(Person.class)
-        .where(Person::getName, "getName", "Moe")
+        .where(Person::getName, "getName").is("Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .list();
     Person personNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
-        .where(Person::getName, "getName", "Moe")
+        .where(Person::getName, "getName").is("Moe")
         .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
         .get();
     List<Rich> richPeople = store()
