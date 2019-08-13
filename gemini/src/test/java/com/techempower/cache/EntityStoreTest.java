@@ -312,7 +312,7 @@ class EntityStoreTest
   {
     List<Doctor> doctorsNamedMoe = store()
         .select(Doctor.class)
-        .where(Doctor::getName, "getName").is("Moe")
+        .where(MethodValue.of(Doctor::getName, "getName").is("Moe"))
         .list();
     assertEquals(new HashSet<>(Arrays.asList(3L, 6L, 8L)), doctorsNamedMoe
         .stream()
@@ -320,7 +320,8 @@ class EntityStoreTest
         .collect(Collectors.toSet()));
     List<Lawyer> lawyersWithOneOrTwoSuits = store()
         .select(Lawyer.class)
-        .where(Lawyer::getNumberOfSuits, "getNumberOfSuits").in(Arrays.asList(1L, 2L))
+        .where(MethodValue.of(Lawyer::getNumberOfSuits, "getNumberOfSuits")
+            .in(Arrays.asList(1L, 2L)))
         .list();
     assertEquals(new HashSet<>(Arrays.asList(2L, 6L, 7L)), lawyersWithOneOrTwoSuits
         .stream()
@@ -334,22 +335,26 @@ class EntityStoreTest
   {
     List<? extends Person> peopleNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
-        .where(Person::getName, "getName").is("Moe")
-        .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
+        .where(MethodValue.of(Person::getName, "getName").is("Moe"))
+        .where(MethodValue.of(Person::getDog, "getDog")
+            .in(Arrays.asList(null, "Poppy")))
         .list();
     List<Person> peopleNamedMoeWithNoDogOrADogNamedPoppy2 = store()
         .selectAnySubclass(Person.class)
-        .where(Person::getName, "getName").is("Moe")
-        .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
+        .where(MethodValue.of(Person::getName, "getName").is("Moe"))
+        .where(MethodValue.of(Person::getDog, "getDog")
+            .in(Arrays.asList(null, "Poppy")))
         .list();
     Person personNamedMoeWithNoDogOrADogNamedPoppy = store()
         .select(Arrays.asList(Doctor.class, Lawyer.class))
-        .where(Person::getName, "getName").is("Moe")
-        .where(Person::getDog, "getDog").in(Arrays.asList(null, "Poppy"))
+        .where(MethodValue.of(Person::getName, "getName").is("Moe"))
+        .where(MethodValue.of(Person::getDog, "getDog")
+            .in(Arrays.asList(null, "Poppy")))
         .get();
     List<Rich> richPeople = store()
         .selectAnySubclass(Rich.class)
-        .where(Rich::getSalary, "getSalary").in(Arrays.asList(405000L, 1000000L))
+        .where(MethodValue.of(Rich::getSalary, "getSalary")
+            .in(Arrays.asList(405000L, 1000000L)))
         .list();
     assertEquals(new HashSet<>(Arrays.asList(3L, 8L)), peopleNamedMoeWithNoDogOrADogNamedPoppy
         .stream()
