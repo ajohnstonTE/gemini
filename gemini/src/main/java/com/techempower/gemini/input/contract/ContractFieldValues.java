@@ -1,6 +1,8 @@
 package com.techempower.gemini.input.contract;
 
 import com.techempower.gemini.input.Values;
+import com.techempower.helper.BoxedBooleanHelper;
+import com.techempower.helper.BoxedNumberHelper;
 
 /**
  * Provides a streamlined means to access the value(s) of a field in a query without the need to specify the name each
@@ -161,7 +163,6 @@ public class ContractFieldValues
    * Gets an enum request value.  If the HttpServletRequest returns null for
    * this parameter, or if the provided value is invalid, null will be returned.
    *
-   * @param field the field to get the value of
    * @param type  the type of the request parameter
    * @return the value as an enum.
    */
@@ -175,7 +176,6 @@ public class ContractFieldValues
    * HttpServletRequest returns null for this parameter, or if the provided
    * value is invalid, the default will be returned.
    *
-   * @param name         the name of the request parameter
    * @param type         the type of the request parameter
    * @param defaultValue a value to be returned if no value is provided by
    *                     the request, or if the provided value is invalid.
@@ -191,7 +191,6 @@ public class ContractFieldValues
    * HttpServletRequest returns null for this parameter, null will
    * be returned.
    *
-   * @param field the field to get the value of
    * @return the value as a double.
    */
   public Double getDouble()
@@ -204,7 +203,6 @@ public class ContractFieldValues
    * HttpServletRequest returns null for this parameter, the default will
    * be returned.
    *
-   * @param name         the name of the request parameter
    * @param defaultValue a value to be returned if no value is provided by
    *                     the request.
    * @return the value as a double.
