@@ -12,7 +12,7 @@ import java.util.List;
  * @author ajohnston
  */
 public class ContractDoubleField<T>
-    extends ContractField<T>
+    extends ExtendableContractField<T, ContractDoubleField<T>>
 {
   private Double min;
   private Double max;
@@ -27,9 +27,10 @@ public class ContractDoubleField<T>
     return min;
   }
   
-  public void setMin(Double min)
+  public ContractDoubleField<T> setMin(Double min)
   {
     this.min = min;
+    return this;
   }
   
   public Double getMax()
@@ -37,9 +38,10 @@ public class ContractDoubleField<T>
     return max;
   }
   
-  public void setMax(Double max)
+  public ContractDoubleField<T> setMax(Double max)
   {
     this.max = max;
+    return this;
   }
   
   @Override

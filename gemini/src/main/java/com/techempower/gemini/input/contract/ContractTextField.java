@@ -12,7 +12,7 @@ import java.util.List;
  * @author ajohnston
  */
 public class ContractTextField<T>
-    extends ContractField<T>
+    extends ExtendableContractField<T, ContractTextField<T>>
 {
   private Integer minLength;
   private Integer maxLength;
@@ -27,9 +27,10 @@ public class ContractTextField<T>
     return minLength;
   }
   
-  public void setMinLength(Integer minLength)
+  public ContractTextField<T> setMinLength(Integer minLength)
   {
     this.minLength = minLength;
+    return this;
   }
   
   public Integer getMaxLength()
@@ -37,9 +38,10 @@ public class ContractTextField<T>
     return maxLength;
   }
   
-  public void setMaxLength(Integer maxLength)
+  public ContractTextField<T> setMaxLength(Integer maxLength)
   {
     this.maxLength = maxLength;
+    return this;
   }
   
   @Override

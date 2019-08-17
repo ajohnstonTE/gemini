@@ -13,7 +13,7 @@ import java.util.List;
  * @author ajohnston
  */
 public class ContractWholeNumberField<T>
-    extends ContractField<T>
+    extends ExtendableContractField<T, ContractWholeNumberField<T>>
 {
   private Long min;
   private Long max;
@@ -28,9 +28,10 @@ public class ContractWholeNumberField<T>
     return min;
   }
   
-  public void setMin(Long min)
+  public ContractWholeNumberField<T> setMin(Long min)
   {
     this.min = min;
+    return this;
   }
   
   public Long getMax()
@@ -38,9 +39,10 @@ public class ContractWholeNumberField<T>
     return max;
   }
   
-  public void setMax(Long max)
+  public ContractWholeNumberField<T> setMax(Long max)
   {
     this.max = max;
+    return this;
   }
   
   @Override

@@ -1,5 +1,6 @@
 package com.techempower.gemini.input.contract;
 
+import com.techempower.gemini.input.Values;
 import com.techempower.gemini.input.validator.Validator;
 
 import java.util.ArrayList;
@@ -33,9 +34,10 @@ public class ContractField<T>
   }
   
   @Override
-  public void addValidator(Validator validator)
+  public ContractField<T> addValidator(Validator validator)
   {
     getCustomValidators().add(validator);
+    return this;
   }
   
   @Override
@@ -51,9 +53,10 @@ public class ContractField<T>
   }
   
   @Override
-  public void setRequired(boolean required)
+  public ContractField<T> setRequired(boolean required)
   {
     this.required = required;
+    return this;
   }
   
   @Override
@@ -63,9 +66,10 @@ public class ContractField<T>
   }
   
   @Override
-  public void setMultivalued(boolean multivalued)
+  public ContractField<T> setMultivalued(boolean multivalued)
   {
     this.multivalued = multivalued;
+    return this;
   }
   
   @Override
@@ -93,15 +97,17 @@ public class ContractField<T>
   }
   
   @Override
-  public void setValueAccess(Function<ContractFieldValues, T> valueAccess)
+  public ContractField<T> setValueAccess(Function<ContractFieldValues, T> valueAccess)
   {
     this.valueAccess = valueAccess;
+    return this;
   }
   
   @Override
-  public void setDefaultValue(T defaultValue)
+  public ContractField<T> setDefaultValue(T defaultValue)
   {
     this.defaultValue = defaultValue;
+    return this;
   }
   
   @Override
@@ -117,9 +123,10 @@ public class ContractField<T>
   }
   
   @Override
-  public void setValue(T value)
+  public ContractField<T> setValue(T value)
   {
     this.value = value;
+    return this;
   }
   
   @Override
@@ -134,5 +141,26 @@ public class ContractField<T>
   protected List<Validator> getCustomValidators()
   {
     return customValidators;
+  }
+
+  @Override
+  public ContractField<T> setValueAccess(Function<ContractFieldValues, T> valueAccess, T defaultValue)
+  {
+    IContractField.super.setValueAccess(valueAccess, defaultValue);
+    return this;
+  }
+
+  @Override
+  public ContractField<T> setValueToDefault()
+  {
+    IContractField.super.setValueToDefault();
+    return this;
+  }
+
+  @Override
+  public ContractField<T> setFrom(Values values)
+  {
+    IContractField.super.setFrom(values);
+    return this;
   }
 }

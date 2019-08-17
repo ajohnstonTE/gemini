@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  * @author ajohnston
  */
 public class ContractSelectField<T>
-    extends ContractField<T>
+    extends ExtendableContractField<T, ContractSelectField<T>>
 {
   private List<Option> options;
   private List<String> selectedValues;
@@ -51,11 +51,12 @@ public class ContractSelectField<T>
   }
   
   @Override
-  public void setValue(T value)
+  public ContractSelectField<T> setValue(T value)
   {
     super.setValue(value);
     // Reset the computed values list, as it is now outdated.
     setSelectedValues(null);
+    return this;
   }
   
   public List<String> getSelectedValues()
@@ -67,9 +68,10 @@ public class ContractSelectField<T>
     return selectedValues();
   }
   
-  protected void setSelectedValues(List<String> selectedValues)
+  protected ContractSelectField<T> setSelectedValues(List<String> selectedValues)
   {
     this.selectedValues = selectedValues;
+    return this;
   }
   
   protected List<String> selectedValues()
@@ -117,9 +119,10 @@ public class ContractSelectField<T>
       this(namedValue.getValue(), namedValue.getName());
     }
     
-    protected void setSelect(ContractSelectField<?> select)
+    protected Option setSelect(ContractSelectField<?> select)
     {
       this.select = select;
+      return this;
     }
     
     protected ContractSelectField<?> getSelect()
