@@ -5,7 +5,7 @@ import com.techempower.gemini.input.validator.Validator;
 
 import java.util.function.Function;
 
-abstract class ExtendableContractField<T, S extends ExtendableContractField<T, S>>
+public abstract class ExtendableContractField<T, S extends ExtendableContractField<T, S>>
   extends ContractField<T>
 {
 
