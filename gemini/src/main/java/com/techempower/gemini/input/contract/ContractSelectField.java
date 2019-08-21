@@ -96,7 +96,9 @@ public class ContractSelectField<T>
       allOptions = valuableOptions;
     }
     List<Validator> validators = super.getStandardValidators();
-    validators.add(new SetFieldValidator<>(this, (Object[]) allOptions.toArray(String[]::new)));
+    validators.add(new SetFieldValidator<T>((Object[]) allOptions.toArray(String[]::new))
+        .setField(this)
+        .asValidator());
     return validators;
   }
   

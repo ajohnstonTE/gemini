@@ -22,6 +22,13 @@ public interface IContractField<T>
    * @param validator the validator to add
    */
   IContractField<T> addValidator(Validator validator);
+
+  /**
+   * Adds a field validator to the field.
+   *
+   * @param fieldValidator the field validator to add
+   */
+  IContractField<T> addFieldValidator(FieldValidator<T> fieldValidator);
   
   /**
    * @return the name of the field
@@ -63,7 +70,9 @@ public interface IContractField<T>
     List<Validator> validators = new ArrayList<>();
     if (isRequired())
     {
-      validators.add(new RequiredFieldValidator(this));
+      validators.add(new RequiredFieldValidator()
+          .setField(this)
+          .asValidator());
     }
     return validators;
   }

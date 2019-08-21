@@ -22,6 +22,13 @@ public abstract class ExtendableContractField<T, S extends ExtendableContractFie
   }
 
   @Override
+  public S addFieldValidator(FieldValidator<T> fieldValidator)
+  {
+    super.addFieldValidator(fieldValidator);
+    return self();
+  }
+
+  @Override
   public S setRequired(boolean required)
   {
     super.setRequired(required);

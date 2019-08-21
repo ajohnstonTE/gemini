@@ -39,6 +39,13 @@ public class ContractField<T>
     getCustomValidators().add(validator);
     return this;
   }
+
+  @Override
+  public ContractField<T> addFieldValidator(FieldValidator<T> fieldValidator)
+  {
+    addValidator(fieldValidator.setField(this).asValidator());
+    return this;
+  }
   
   @Override
   public String getName()
@@ -78,7 +85,9 @@ public class ContractField<T>
     List<Validator> validators = new ArrayList<>();
     if (isRequired())
     {
-      validators.add(new RequiredFieldValidator(this));
+      validators.add(new RequiredFieldValidator()
+          .setField(this)
+          .asValidator());
     }
     return validators;
   }

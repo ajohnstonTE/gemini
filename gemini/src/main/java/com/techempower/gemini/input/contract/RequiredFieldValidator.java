@@ -13,19 +13,24 @@ public class RequiredFieldValidator
   /**
    * Constructor.
    */
-  public RequiredFieldValidator(IContractField<?> field)
+  public RequiredFieldValidator()
   {
-    super(field);
-    message(getField().getName() + " is required.");
   }
-  
+
+  @Override
+  protected FieldValidator setField(IContractField field)
+  {
+    super.setField(field);
+    return this;
+  }
+
   @Override
   public void process(final Input input)
   {
     Object value = getValue(input);
     if (value == null || (value instanceof String && StringHelper.isEmpty((String) value)))
     {
-      input.addError(getElementName(), getMessage());
+      input.addError(getElementName(), getElementName() + " is required.");
     }
   }
 }

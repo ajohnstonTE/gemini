@@ -30,19 +30,18 @@ public class SetFieldValidator<T>
   /**
    * Constructor.
    */
-  public SetFieldValidator(ContractField<T> field, Object... validValues)
+  public SetFieldValidator(Object... validValues)
   {
-    super(field);
     this.permitted = Arrays.stream(validValues)
         .map(String::valueOf)
         .collect(Collectors.toSet());
-    message(field.getName() + " must be a permitted value.");
   }
-  
+
   @Override
   public void process(final Input input)
   {
     final T actualValue = getValue(input);
+    String message = getElementName() + " must be a permitted value.";
     if (actualValue != null && (actualValue instanceof Iterable || actualValue.getClass().isArray()))
     {
       List<String> values = new ContractHelper().valueToList(actualValue);
