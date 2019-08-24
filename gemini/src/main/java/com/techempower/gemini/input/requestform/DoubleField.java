@@ -11,13 +11,13 @@ import java.util.List;
  *
  * @author ajohnston
  */
-public class FormDoubleField<T>
-    extends ExtendableFormField<T, FormDoubleField<T>>
+public class DoubleField<T>
+    extends ExtendableField<T, DoubleField<T>>
 {
   private Double min;
   private Double max;
   
-  public FormDoubleField(IRequestForm contract, String name)
+  public DoubleField(IRequestForm contract, String name)
   {
     super(contract, name);
   }
@@ -27,7 +27,7 @@ public class FormDoubleField<T>
     return min;
   }
   
-  public FormDoubleField<T> setMin(Double min)
+  public DoubleField<T> setMin(Double min)
   {
     this.min = min;
     return this;
@@ -38,7 +38,7 @@ public class FormDoubleField<T>
     return max;
   }
   
-  public FormDoubleField<T> setMax(Double max)
+  public DoubleField<T> setMax(Double max)
   {
     this.max = max;
     return this;

@@ -20,8 +20,8 @@ import java.util.stream.Stream;
 public class RequestForm
     implements IRequestForm
 {
-  private List<IFormField<?>> fields;
-  private List<Validator>     customValidators;
+  private List<IField<?>> fields;
+  private List<Validator> customValidators;
 
   public RequestForm()
   {
@@ -30,13 +30,13 @@ public class RequestForm
   }
 
   @Override
-  public List<IFormField<?>> getFields()
+  public List<IField<?>> getFields()
   {
     return new ArrayList<>(fields);
   }
 
   @Override
-  public void addField(IFormField<?> field)
+  public void addField(IField<?> field)
   {
     fields().add(field);
   }
@@ -47,7 +47,7 @@ public class RequestForm
     customValidators().add(validator);
   }
 
-  protected List<IFormField<?>> fields()
+  protected List<IField<?>> fields()
   {
     return fields;
   }

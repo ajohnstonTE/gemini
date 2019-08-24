@@ -10,10 +10,10 @@ import com.techempower.helper.BoxedNumberHelper;
  */
 public class ValueAccess
 {
-  private Values        values;
-  private IFormField<?> field;
+  private Values    values;
+  private IField<?> field;
 
-  public ValueAccess(Values values, IFormField<?> field)
+  public ValueAccess(Values values, IField<?> field)
   {
     this.values = values;
     this.field = field;
@@ -24,7 +24,7 @@ public class ValueAccess
     return values;
   }
 
-  protected IFormField<?> getField()
+  protected IField<?> getField()
   {
     return field;
   }

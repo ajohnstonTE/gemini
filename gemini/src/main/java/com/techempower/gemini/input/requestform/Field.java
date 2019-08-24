@@ -15,8 +15,8 @@ import java.util.function.Function;
  *
  * @author ajohnston
  */
-public class FormField<T>
-    implements IFormField<T>
+public class Field<T>
+    implements IField<T>
 {
   private String                   name;
   private List<Validator>          customValidators;
@@ -26,7 +26,7 @@ public class FormField<T>
   private T                        defaultValue;
   private boolean                  multivalued;
   
-  public FormField(IRequestForm contract, String name)
+  public Field(IRequestForm contract, String name)
   {
     this.name = name;
     this.customValidators = new ArrayList<>();
@@ -34,14 +34,14 @@ public class FormField<T>
   }
   
   @Override
-  public FormField<T> addValidator(Validator validator)
+  public Field<T> addValidator(Validator validator)
   {
     getCustomValidators().add(validator);
     return this;
   }
 
   @Override
-  public FormField<T> addFieldValidator(FieldValidator<T> fieldValidator)
+  public Field<T> addFieldValidator(FieldValidator<T> fieldValidator)
   {
     addValidator(fieldValidator.setField(this).asValidator());
     return this;
@@ -60,7 +60,7 @@ public class FormField<T>
   }
   
   @Override
-  public FormField<T> setRequired(boolean required)
+  public Field<T> setRequired(boolean required)
   {
     this.required = required;
     return this;
@@ -73,7 +73,7 @@ public class FormField<T>
   }
   
   @Override
-  public FormField<T> setMultivalued(boolean multivalued)
+  public Field<T> setMultivalued(boolean multivalued)
   {
     this.multivalued = multivalued;
     return this;
@@ -106,14 +106,14 @@ public class FormField<T>
   }
   
   @Override
-  public FormField<T> setValueAccess(Function<ValueAccess, T> valueAccess)
+  public Field<T> setValueAccess(Function<ValueAccess, T> valueAccess)
   {
     this.valueAccess = valueAccess;
     return this;
   }
   
   @Override
-  public FormField<T> setDefaultValue(T defaultValue)
+  public Field<T> setDefaultValue(T defaultValue)
   {
     this.defaultValue = defaultValue;
     return this;
@@ -132,7 +132,7 @@ public class FormField<T>
   }
   
   @Override
-  public FormField<T> setValue(T value)
+  public Field<T> setValue(T value)
   {
     this.value = value;
     return this;
@@ -153,23 +153,23 @@ public class FormField<T>
   }
 
   @Override
-  public FormField<T> setValueAccess(Function<ValueAccess, T> valueAccess, T defaultValue)
+  public Field<T> setValueAccess(Function<ValueAccess, T> valueAccess, T defaultValue)
   {
-    IFormField.super.setValueAccess(valueAccess, defaultValue);
+    IField.super.setValueAccess(valueAccess, defaultValue);
     return this;
   }
 
   @Override
-  public FormField<T> setValueToDefault()
+  public Field<T> setValueToDefault()
   {
-    IFormField.super.setValueToDefault();
+    IField.super.setValueToDefault();
     return this;
   }
 
   @Override
-  public FormField<T> setFrom(Values values)
+  public Field<T> setFrom(Values values)
   {
-    IFormField.super.setFrom(values);
+    IField.super.setFrom(values);
     return this;
   }
 }

@@ -16,31 +16,31 @@ import java.util.stream.Stream;
  *
  * @author ajohnston
  */
-public class FormSelectField<T>
-    extends ExtendableFormField<T, FormSelectField<T>>
+public class SelectField<T>
+    extends ExtendableField<T, SelectField<T>>
 {
   private List<Option> options;
   private List<String> selectedValues;
   
-  public FormSelectField(IRequestForm contract, String name)
+  public SelectField(IRequestForm contract, String name)
   {
     super(contract, name);
     options = new ArrayList<>();
   }
   
-  public FormSelectField addOption(Option option)
+  public SelectField addOption(Option option)
   {
     options.add(option);
     option.setSelect(this);
     return this;
   }
   
-  public FormSelectField addOption(Object value, String label)
+  public SelectField addOption(Object value, String label)
   {
     return this.addOption(new Option(String.valueOf(value), label));
   }
   
-  public FormSelectField addOption(String value)
+  public SelectField addOption(String value)
   {
     return addOption(value, value);
   }
@@ -51,7 +51,7 @@ public class FormSelectField<T>
   }
   
   @Override
-  public FormSelectField<T> setValue(T value)
+  public SelectField<T> setValue(T value)
   {
     super.setValue(value);
     // Reset the computed values list, as it is now outdated.
@@ -68,7 +68,7 @@ public class FormSelectField<T>
     return selectedValues();
   }
   
-  protected FormSelectField<T> setSelectedValues(List<String> selectedValues)
+  protected SelectField<T> setSelectedValues(List<String> selectedValues)
   {
     this.selectedValues = selectedValues;
     return this;
@@ -104,7 +104,7 @@ public class FormSelectField<T>
   
   public static class Option
   {
-    private FormSelectField<?> select;
+    private SelectField<?>          select;
     private String                  value;
     private String                  label;
     private HashMap<Object, Object> data;
@@ -121,13 +121,13 @@ public class FormSelectField<T>
       this(namedValue.getValue(), namedValue.getName());
     }
     
-    protected Option setSelect(FormSelectField<?> select)
+    protected Option setSelect(SelectField<?> select)
     {
       this.select = select;
       return this;
     }
     
-    protected FormSelectField<?> getSelect()
+    protected SelectField<?> getSelect()
     {
       return select;
     }

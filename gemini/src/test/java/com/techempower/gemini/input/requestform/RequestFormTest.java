@@ -13,7 +13,7 @@ public class RequestFormTest
   {
     class RequestFormSubclass extends RequestForm
     {
-      public FormField field = new FormField<String>(this,"foo")
+      public Field field = new Field<String>(this,"foo")
           .setRequired(true)
           .setValueAccess(ValueAccess::getString, "dog");
     }
@@ -26,7 +26,7 @@ public class RequestFormTest
 
   static class DeclaredRequestFormSubclass extends RequestForm
   {
-    public FormField field = new FormField<String>(this,"foo")
+    public Field field = new Field<String>(this,"foo")
         .setRequired(true)
         .setValueAccess(ValueAccess::getString, "dog");
   }

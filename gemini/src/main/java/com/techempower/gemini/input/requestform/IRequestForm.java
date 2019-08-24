@@ -18,14 +18,14 @@ public interface IRequestForm
   /**
    * @return all fields included in this form
    */
-  List<IFormField<?>> getFields();
+  List<IField<?>> getFields();
   
   /**
    * Adds a field to the form
    *
    * @param field the field to add
    */
-  void addField(IFormField<?> field);
+  void addField(IField<?> field);
   
   /**
    * Adds a validator to the form

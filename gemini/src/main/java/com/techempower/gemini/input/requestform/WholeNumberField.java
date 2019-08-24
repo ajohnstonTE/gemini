@@ -12,13 +12,13 @@ import java.util.List;
  *
  * @author ajohnston
  */
-public class FormWholeNumberField<T>
-    extends ExtendableFormField<T, FormWholeNumberField<T>>
+public class WholeNumberField<T>
+    extends ExtendableField<T, WholeNumberField<T>>
 {
   private Long min;
   private Long max;
   
-  public FormWholeNumberField(IRequestForm contract, String name)
+  public WholeNumberField(IRequestForm contract, String name)
   {
     super(contract, name);
   }
@@ -28,7 +28,7 @@ public class FormWholeNumberField<T>
     return min;
   }
   
-  public FormWholeNumberField<T> setMin(Long min)
+  public WholeNumberField<T> setMin(Long min)
   {
     this.min = min;
     return this;
@@ -39,7 +39,7 @@ public class FormWholeNumberField<T>
     return max;
   }
   
-  public FormWholeNumberField<T> setMax(Long max)
+  public WholeNumberField<T> setMax(Long max)
   {
     this.max = max;
     return this;

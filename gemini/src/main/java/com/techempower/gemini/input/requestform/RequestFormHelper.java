@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class RequestFormHelper
 {
-  public static FormSelectField addOptionsForMonth(FormSelectField formSelect, Context context)
+  public static SelectField addOptionsForMonth(SelectField formSelect, Context context)
   {
     return addOptionsFromResources(formSelect, context, "gfddmm");
   }
@@ -27,7 +27,7 @@ public class RequestFormHelper
    * "foo-values" (comma-separated) and the labels would be loaded from
    * "foo-display" (separated by '#' characters).
    */
-  public static FormSelectField addOptionsFromResources(FormSelectField formSelect, Context context, String prefix)
+  public static SelectField addOptionsFromResources(SelectField formSelect, Context context, String prefix)
   {
     String[] resourcedValues = context.getResources().get(prefix + "-value").split(",");
     String[] resourcedLabels = context.getResources().get(prefix + "-display").split("#");
@@ -45,7 +45,7 @@ public class RequestFormHelper
    * @param negativeDelta Years prior to allow (e.g., 2).
    * @param positiveDelta Years in advance to allow (e.g., 10).
    */
-  public static FormSelectField addOptionsForYear(FormSelectField formSelect, int negativeDelta, int positiveDelta)
+  public static SelectField addOptionsForYear(SelectField formSelect, int negativeDelta, int positiveDelta)
   {
     int currentYear = Calendar.getInstance().get(Calendar.YEAR);
     int maxValue = currentYear + positiveDelta;

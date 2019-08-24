@@ -17,7 +17,7 @@ public abstract class FieldValidator<T>
   // Variables.
   //
 
-  private IFormField<T> field;
+  private IField<T> field;
 
   /**
    * Constructor.
@@ -32,13 +32,13 @@ public abstract class FieldValidator<T>
    *
    * @param field
    */
-  protected FieldValidator<T> setField(IFormField<T> field)
+  protected FieldValidator<T> setField(IField<T> field)
   {
     this.field = field;
     return this;
   }
   
-  protected IFormField<T> getField()
+  protected IField<T> getField()
   {
     return field;
   }

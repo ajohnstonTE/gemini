@@ -18,7 +18,7 @@ public class RequiredFieldValidator
   }
 
   @Override
-  protected FieldValidator setField(IFormField field)
+  protected FieldValidator setField(IField field)
   {
     super.setField(field);
     return this;

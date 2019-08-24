@@ -5,11 +5,11 @@ import com.techempower.gemini.input.validator.Validator;
 
 import java.util.function.Function;
 
-public abstract class ExtendableFormField<T, S extends ExtendableFormField<T, S>>
-  extends FormField<T>
+public abstract class ExtendableField<T, S extends ExtendableField<T, S>>
+  extends Field<T>
 {
 
-  public ExtendableFormField(IRequestForm contract, String name)
+  public ExtendableField(IRequestForm contract, String name)
   {
     super(contract, name);
   }

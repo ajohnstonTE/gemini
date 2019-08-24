@@ -11,13 +11,13 @@ import java.util.List;
  *
  * @author ajohnston
  */
-public class FormTextField<T>
-    extends ExtendableFormField<T, FormTextField<T>>
+public class TextField<T>
+    extends ExtendableField<T, TextField<T>>
 {
   private Integer minLength;
   private Integer maxLength;
   
-  public FormTextField(IRequestForm contract, String name)
+  public TextField(IRequestForm contract, String name)
   {
     super(contract, name);
   }
@@ -27,7 +27,7 @@ public class FormTextField<T>
     return minLength;
   }
   
-  public FormTextField<T> setMinLength(Integer minLength)
+  public TextField<T> setMinLength(Integer minLength)
   {
     this.minLength = minLength;
     return this;
@@ -38,7 +38,7 @@ public class FormTextField<T>
     return maxLength;
   }
   
-  public FormTextField<T> setMaxLength(Integer maxLength)
+  public TextField<T> setMaxLength(Integer maxLength)
   {
     this.maxLength = maxLength;
     return this;
