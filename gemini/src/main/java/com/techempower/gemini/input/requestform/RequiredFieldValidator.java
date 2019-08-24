@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.Input;
 import com.techempower.helper.StringHelper;
@@ -18,7 +18,7 @@ public class RequiredFieldValidator
   }
 
   @Override
-  protected FieldValidator setField(IContractField field)
+  protected FieldValidator setField(IFormField field)
   {
     super.setField(field);
     return this;

@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.validator.LongValidator;
 import com.techempower.gemini.input.validator.NumericValidator;
@@ -12,13 +12,13 @@ import java.util.List;
  *
  * @author ajohnston
  */
-public class ContractWholeNumberField<T>
-    extends ExtendableContractField<T, ContractWholeNumberField<T>>
+public class FormWholeNumberField<T>
+    extends ExtendableFormField<T, FormWholeNumberField<T>>
 {
   private Long min;
   private Long max;
   
-  public ContractWholeNumberField(IContract contract, String name)
+  public FormWholeNumberField(IRequestForm contract, String name)
   {
     super(contract, name);
   }
@@ -28,7 +28,7 @@ public class ContractWholeNumberField<T>
     return min;
   }
   
-  public ContractWholeNumberField<T> setMin(Long min)
+  public FormWholeNumberField<T> setMin(Long min)
   {
     this.min = min;
     return this;
@@ -39,7 +39,7 @@ public class ContractWholeNumberField<T>
     return max;
   }
   
-  public ContractWholeNumberField<T> setMax(Long max)
+  public FormWholeNumberField<T> setMax(Long max)
   {
     this.max = max;
     return this;

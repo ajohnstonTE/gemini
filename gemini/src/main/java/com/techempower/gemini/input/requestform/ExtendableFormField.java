@@ -1,15 +1,15 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.Values;
 import com.techempower.gemini.input.validator.Validator;
 
 import java.util.function.Function;
 
-public abstract class ExtendableContractField<T, S extends ExtendableContractField<T, S>>
-  extends ContractField<T>
+public abstract class ExtendableFormField<T, S extends ExtendableFormField<T, S>>
+  extends FormField<T>
 {
 
-  public ExtendableContractField(IContract contract, String name)
+  public ExtendableFormField(IRequestForm contract, String name)
   {
     super(contract, name);
   }
@@ -43,7 +43,7 @@ public abstract class ExtendableContractField<T, S extends ExtendableContractFie
   }
 
   @Override
-  public S setValueAccess(Function<ContractFieldValues, T> valueAccess)
+  public S setValueAccess(Function<ValueAccess, T> valueAccess)
   {
     super.setValueAccess(valueAccess);
     return self();
@@ -64,7 +64,7 @@ public abstract class ExtendableContractField<T, S extends ExtendableContractFie
   }
 
   @Override
-  public S setValueAccess(Function<ContractFieldValues, T> valueAccess, T defaultValue)
+  public S setValueAccess(Function<ValueAccess, T> valueAccess, T defaultValue)
   {
     super.setValueAccess(valueAccess, defaultValue);
     return self();

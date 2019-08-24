@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.Input;
 
@@ -44,7 +44,7 @@ public class SetFieldValidator<T>
     String message = getElementName() + " must be a permitted value.";
     if (actualValue != null && (actualValue instanceof Iterable || actualValue.getClass().isArray()))
     {
-      List<String> values = new ContractHelper().valueToList(actualValue);
+      List<String> values = new RequestFormHelper().valueToList(actualValue);
       if (values.stream().anyMatch(value -> !permitted.contains(value)))
       {
         input.addError(getElementName(), message);

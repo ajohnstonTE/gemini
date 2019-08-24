@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.Context;
 
@@ -10,14 +10,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Provides utility methods for contracts, several of which are duplicated from
- * {@link com.techempower.gemini.form.FormSelect FormSelect}.
+ * Provides utility methods for request forms.
  *
  * @author ajohnston
  */
-public class ContractHelper
+public class RequestFormHelper
 {
-  public static ContractSelectField addOptionsForMonth(ContractSelectField formSelect, Context context)
+  public static FormSelectField addOptionsForMonth(FormSelectField formSelect, Context context)
   {
     return addOptionsFromResources(formSelect, context, "gfddmm");
   }
@@ -28,7 +27,7 @@ public class ContractHelper
    * "foo-values" (comma-separated) and the labels would be loaded from
    * "foo-display" (separated by '#' characters).
    */
-  public static ContractSelectField addOptionsFromResources(ContractSelectField formSelect, Context context, String prefix)
+  public static FormSelectField addOptionsFromResources(FormSelectField formSelect, Context context, String prefix)
   {
     String[] resourcedValues = context.getResources().get(prefix + "-value").split(",");
     String[] resourcedLabels = context.getResources().get(prefix + "-display").split("#");
@@ -46,7 +45,7 @@ public class ContractHelper
    * @param negativeDelta Years prior to allow (e.g., 2).
    * @param positiveDelta Years in advance to allow (e.g., 10).
    */
-  public static ContractSelectField addOptionsForYear(ContractSelectField formSelect, int negativeDelta, int positiveDelta)
+  public static FormSelectField addOptionsForYear(FormSelectField formSelect, int negativeDelta, int positiveDelta)
   {
     int currentYear = Calendar.getInstance().get(Calendar.YEAR);
     int maxValue = currentYear + positiveDelta;

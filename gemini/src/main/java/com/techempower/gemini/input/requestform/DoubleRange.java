@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.helper.NumberHelper;
 import com.techempower.util.Args;

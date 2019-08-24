@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.validator.Validator;
 import com.techempower.helper.StringHelper;
@@ -11,13 +11,13 @@ import java.util.List;
  *
  * @author ajohnston
  */
-public class ContractDoubleField<T>
-    extends ExtendableContractField<T, ContractDoubleField<T>>
+public class FormDoubleField<T>
+    extends ExtendableFormField<T, FormDoubleField<T>>
 {
   private Double min;
   private Double max;
   
-  public ContractDoubleField(IContract contract, String name)
+  public FormDoubleField(IRequestForm contract, String name)
   {
     super(contract, name);
   }
@@ -27,7 +27,7 @@ public class ContractDoubleField<T>
     return min;
   }
   
-  public ContractDoubleField<T> setMin(Double min)
+  public FormDoubleField<T> setMin(Double min)
   {
     this.min = min;
     return this;
@@ -38,7 +38,7 @@ public class ContractDoubleField<T>
     return max;
   }
   
-  public ContractDoubleField<T> setMax(Double max)
+  public FormDoubleField<T> setMax(Double max)
   {
     this.max = max;
     return this;

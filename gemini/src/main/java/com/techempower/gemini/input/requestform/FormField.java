@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.Values;
 import com.techempower.gemini.input.validator.Validator;
@@ -15,18 +15,18 @@ import java.util.function.Function;
  *
  * @author ajohnston
  */
-public class ContractField<T>
-    implements IContractField<T>
+public class FormField<T>
+    implements IFormField<T>
 {
-  private String                           name;
-  private List<Validator>                  customValidators;
-  private boolean                          required;
-  private Function<ContractFieldValues, T> valueAccess;
-  private T                                value;
-  private T                                defaultValue;
-  private boolean                          multivalued;
+  private String                   name;
+  private List<Validator>          customValidators;
+  private boolean                  required;
+  private Function<ValueAccess, T> valueAccess;
+  private T                        value;
+  private T                        defaultValue;
+  private boolean                  multivalued;
   
-  public ContractField(IContract contract, String name)
+  public FormField(IRequestForm contract, String name)
   {
     this.name = name;
     this.customValidators = new ArrayList<>();
@@ -34,14 +34,14 @@ public class ContractField<T>
   }
   
   @Override
-  public ContractField<T> addValidator(Validator validator)
+  public FormField<T> addValidator(Validator validator)
   {
     getCustomValidators().add(validator);
     return this;
   }
 
   @Override
-  public ContractField<T> addFieldValidator(FieldValidator<T> fieldValidator)
+  public FormField<T> addFieldValidator(FieldValidator<T> fieldValidator)
   {
     addValidator(fieldValidator.setField(this).asValidator());
     return this;
@@ -60,7 +60,7 @@ public class ContractField<T>
   }
   
   @Override
-  public ContractField<T> setRequired(boolean required)
+  public FormField<T> setRequired(boolean required)
   {
     this.required = required;
     return this;
@@ -73,7 +73,7 @@ public class ContractField<T>
   }
   
   @Override
-  public ContractField<T> setMultivalued(boolean multivalued)
+  public FormField<T> setMultivalued(boolean multivalued)
   {
     this.multivalued = multivalued;
     return this;
@@ -106,14 +106,14 @@ public class ContractField<T>
   }
   
   @Override
-  public ContractField<T> setValueAccess(Function<ContractFieldValues, T> valueAccess)
+  public FormField<T> setValueAccess(Function<ValueAccess, T> valueAccess)
   {
     this.valueAccess = valueAccess;
     return this;
   }
   
   @Override
-  public ContractField<T> setDefaultValue(T defaultValue)
+  public FormField<T> setDefaultValue(T defaultValue)
   {
     this.defaultValue = defaultValue;
     return this;
@@ -132,14 +132,14 @@ public class ContractField<T>
   }
   
   @Override
-  public ContractField<T> setValue(T value)
+  public FormField<T> setValue(T value)
   {
     this.value = value;
     return this;
   }
   
   @Override
-  public Function<ContractFieldValues, T> getValueAccess()
+  public Function<ValueAccess, T> getValueAccess()
   {
     return valueAccess;
   }
@@ -153,23 +153,23 @@ public class ContractField<T>
   }
 
   @Override
-  public ContractField<T> setValueAccess(Function<ContractFieldValues, T> valueAccess, T defaultValue)
+  public FormField<T> setValueAccess(Function<ValueAccess, T> valueAccess, T defaultValue)
   {
-    IContractField.super.setValueAccess(valueAccess, defaultValue);
+    IFormField.super.setValueAccess(valueAccess, defaultValue);
     return this;
   }
 
   @Override
-  public ContractField<T> setValueToDefault()
+  public FormField<T> setValueToDefault()
   {
-    IContractField.super.setValueToDefault();
+    IFormField.super.setValueToDefault();
     return this;
   }
 
   @Override
-  public ContractField<T> setFrom(Values values)
+  public FormField<T> setFrom(Values values)
   {
-    IContractField.super.setFrom(values);
+    IFormField.super.setFrom(values);
     return this;
   }
 }

@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import org.junit.Test;
 
@@ -6,36 +6,36 @@ import java.util.Collections;
 
 import static org.junit.Assert.*;
 
-public class ContractTest
+public class RequestFormTest
 {
   @Test
   public void testAnonymousSubclass()
   {
-    class ContractSubclass extends Contract
+    class RequestFormSubclass extends RequestForm
     {
-      public ContractField field = new ContractField<String>(this,"foo")
+      public FormField field = new FormField<String>(this,"foo")
           .setRequired(true)
-          .setValueAccess(ContractFieldValues::getString, "dog");
+          .setValueAccess(ValueAccess::getString, "dog");
     }
-    ContractSubclass contract = new ContractSubclass();
+    RequestFormSubclass contract = new RequestFormSubclass();
 
     assertEquals(
         Collections.singletonList(contract.field),
         contract.getFields());
   }
 
-  static class DeclaredContractSubclass extends Contract
+  static class DeclaredRequestFormSubclass extends RequestForm
   {
-    public ContractField field = new ContractField<String>(this,"foo")
+    public FormField field = new FormField<String>(this,"foo")
         .setRequired(true)
-        .setValueAccess(ContractFieldValues::getString, "dog");
+        .setValueAccess(ValueAccess::getString, "dog");
   }
 
   @Test
   public void testDeclaredSubclass()
   {
 
-    DeclaredContractSubclass contract = new DeclaredContractSubclass();
+    DeclaredRequestFormSubclass contract = new DeclaredRequestFormSubclass();
 
     assertEquals(
         Collections.singletonList(contract.field),

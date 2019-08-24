@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.validator.LengthValidator;
 import com.techempower.gemini.input.validator.Validator;
@@ -11,13 +11,13 @@ import java.util.List;
  *
  * @author ajohnston
  */
-public class ContractTextField<T>
-    extends ExtendableContractField<T, ContractTextField<T>>
+public class FormTextField<T>
+    extends ExtendableFormField<T, FormTextField<T>>
 {
   private Integer minLength;
   private Integer maxLength;
   
-  public ContractTextField(IContract contract, String name)
+  public FormTextField(IRequestForm contract, String name)
   {
     super(contract, name);
   }
@@ -27,7 +27,7 @@ public class ContractTextField<T>
     return minLength;
   }
   
-  public ContractTextField<T> setMinLength(Integer minLength)
+  public FormTextField<T> setMinLength(Integer minLength)
   {
     this.minLength = minLength;
     return this;
@@ -38,7 +38,7 @@ public class ContractTextField<T>
     return maxLength;
   }
   
-  public ContractTextField<T> setMaxLength(Integer maxLength)
+  public FormTextField<T> setMaxLength(Integer maxLength)
   {
     this.maxLength = maxLength;
     return this;

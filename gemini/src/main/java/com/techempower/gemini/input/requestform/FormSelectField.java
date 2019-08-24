@@ -1,4 +1,4 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.collection.NamedValue;
 import com.techempower.gemini.input.validator.Validator;
@@ -16,31 +16,31 @@ import java.util.stream.Stream;
  *
  * @author ajohnston
  */
-public class ContractSelectField<T>
-    extends ExtendableContractField<T, ContractSelectField<T>>
+public class FormSelectField<T>
+    extends ExtendableFormField<T, FormSelectField<T>>
 {
   private List<Option> options;
   private List<String> selectedValues;
   
-  public ContractSelectField(IContract contract, String name)
+  public FormSelectField(IRequestForm contract, String name)
   {
     super(contract, name);
     options = new ArrayList<>();
   }
   
-  public ContractSelectField addOption(Option option)
+  public FormSelectField addOption(Option option)
   {
     options.add(option);
     option.setSelect(this);
     return this;
   }
   
-  public ContractSelectField addOption(Object value, String label)
+  public FormSelectField addOption(Object value, String label)
   {
     return this.addOption(new Option(String.valueOf(value), label));
   }
   
-  public ContractSelectField addOption(String value)
+  public FormSelectField addOption(String value)
   {
     return addOption(value, value);
   }
@@ -51,7 +51,7 @@ public class ContractSelectField<T>
   }
   
   @Override
-  public ContractSelectField<T> setValue(T value)
+  public FormSelectField<T> setValue(T value)
   {
     super.setValue(value);
     // Reset the computed values list, as it is now outdated.
@@ -63,12 +63,12 @@ public class ContractSelectField<T>
   {
     if (selectedValues() == null)
     {
-      setSelectedValues(new ContractHelper().valueToList(getValue()));
+      setSelectedValues(new RequestFormHelper().valueToList(getValue()));
     }
     return selectedValues();
   }
   
-  protected ContractSelectField<T> setSelectedValues(List<String> selectedValues)
+  protected FormSelectField<T> setSelectedValues(List<String> selectedValues)
   {
     this.selectedValues = selectedValues;
     return this;
@@ -104,7 +104,7 @@ public class ContractSelectField<T>
   
   public static class Option
   {
-    private ContractSelectField<?> select;
+    private FormSelectField<?> select;
     private String                  value;
     private String                  label;
     private HashMap<Object, Object> data;
@@ -121,13 +121,13 @@ public class ContractSelectField<T>
       this(namedValue.getValue(), namedValue.getName());
     }
     
-    protected Option setSelect(ContractSelectField<?> select)
+    protected Option setSelect(FormSelectField<?> select)
     {
       this.select = select;
       return this;
     }
     
-    protected ContractSelectField<?> getSelect()
+    protected FormSelectField<?> getSelect()
     {
       return select;
     }

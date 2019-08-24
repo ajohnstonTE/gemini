@@ -1,11 +1,10 @@
-package com.techempower.gemini.input.contract;
+package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.Input;
-import com.techempower.gemini.input.validator.ElementValidator;
 import com.techempower.gemini.input.validator.Validator;
 
 /**
- * A validator to be applied for a contract field. This field does not directly
+ * A validator to be applied for a form field. This field does not directly
  * extend validator as it is *not* intended to be added directly. Instead, the
  * field it is added to should provide a reference to itself, then convert it
  * to a validator. This is for the purpose of chain calls.
@@ -18,7 +17,7 @@ public abstract class FieldValidator<T>
   // Variables.
   //
 
-  private IContractField<T> field;
+  private IFormField<T> field;
 
   /**
    * Constructor.
@@ -33,13 +32,13 @@ public abstract class FieldValidator<T>
    *
    * @param field
    */
-  protected FieldValidator<T> setField(IContractField<T> field)
+  protected FieldValidator<T> setField(IFormField<T> field)
   {
     this.field = field;
     return this;
   }
   
-  protected IContractField<T> getField()
+  protected IFormField<T> getField()
   {
     return field;
   }
