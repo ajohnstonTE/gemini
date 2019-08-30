@@ -178,4 +178,9 @@ public interface IField<T>
   }
   
   Function<ValueAccess, T> getValueAccess();
+
+  /**
+   * @return the type of value managed by this field
+   */
+  Class<T> getType();
 }

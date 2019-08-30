@@ -22,9 +22,9 @@ public class SelectField<T>
   private List<Option> options;
   private List<String> selectedValues;
   
-  public SelectField(IRequestForm contract, String name)
+  public SelectField(IRequestForm contract, String name, Class<T> type)
   {
-    super(contract, name);
+    super(contract, name, type);
     options = new ArrayList<>();
   }
   

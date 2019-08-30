@@ -19,20 +19,23 @@ public class Field<T>
     implements IField<T>
 {
   private String                   name;
+  private Class<T>                 type;
   private List<Validator>          customValidators;
   private boolean                  required;
   private Function<ValueAccess, T> valueAccess;
   private T                        value;
   private T                        defaultValue;
   private boolean                  multivalued;
-  
-  public Field(IRequestForm contract, String name)
+
+  public Field(IRequestForm contract, String name, Class<T> type)
   {
     this.name = name;
     this.customValidators = new ArrayList<>();
+    this.type = type;
+    this.determineDefaultValueAccess();
     contract.addField(this);
   }
-  
+
   @Override
   public Field<T> addValidator(Validator validator)
   {
@@ -46,39 +49,45 @@ public class Field<T>
     addValidator(fieldValidator.setField(this).asValidator());
     return this;
   }
-  
+
   @Override
   public String getName()
   {
     return name;
   }
-  
+
+  @Override
+  public Class<T> getType()
+  {
+    return type;
+  }
+
   @Override
   public boolean isRequired()
   {
     return required;
   }
-  
+
   @Override
   public Field<T> setRequired(boolean required)
   {
     this.required = required;
     return this;
   }
-  
+
   @Override
   public boolean isMultivalued()
   {
     return multivalued;
   }
-  
+
   @Override
   public Field<T> setMultivalued(boolean multivalued)
   {
     this.multivalued = multivalued;
     return this;
   }
-  
+
   @Override
   public List<Validator> getStandardValidators()
   {
@@ -91,7 +100,7 @@ public class Field<T>
     }
     return validators;
   }
-  
+
   @Override
   public List<Validator> getValidators()
   {
@@ -104,46 +113,46 @@ public class Field<T>
     }
     return validators;
   }
-  
+
   @Override
   public Field<T> setValueAccess(Function<ValueAccess, T> valueAccess)
   {
     this.valueAccess = valueAccess;
     return this;
   }
-  
+
   @Override
   public Field<T> setDefaultValue(T defaultValue)
   {
     this.defaultValue = defaultValue;
     return this;
   }
-  
+
   @Override
   public T getDefaultValue()
   {
     return defaultValue;
   }
-  
+
   @Override
   public T getValue()
   {
     return value;
   }
-  
+
   @Override
   public Field<T> setValue(T value)
   {
     this.value = value;
     return this;
   }
-  
+
   @Override
   public Function<ValueAccess, T> getValueAccess()
   {
     return valueAccess;
   }
-  
+
   /**
    * @return any/all custom validators added to the field externally
    */
@@ -171,5 +180,76 @@ public class Field<T>
   {
     IField.super.setFrom(values);
     return this;
+  }
+
+  @SuppressWarnings("unchecked")
+  protected void determineDefaultValueAccess()
+  {
+    Class<T> type = getType();
+    if (Long.class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getLong());
+    }
+    else if (Integer.class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getInt());
+    }
+    else if (Short.class.equals(type))
+    {
+      setValueAccess(values -> {
+        Integer value = values.getInt();
+        if (value != null)
+        {
+          return (T)(Short)value.shortValue();
+        }
+        return null;
+      });
+    }
+    else if (Byte.class.equals(type))
+    {
+      setValueAccess(values -> {
+        Integer value = values.getInt();
+        if (value != null)
+        {
+          return (T)(Byte)value.byteValue();
+        }
+        return null;
+      });
+    }
+    else if (Double.class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getDouble());
+    }
+    else if (Float.class.equals(type))
+    {
+      setValueAccess(values -> {
+        Double value = values.getDouble();
+        if (value != null)
+        {
+          return (T)(Float)value.floatValue();
+        }
+        return null;
+      });
+    }
+    else if (String.class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getString());
+    }
+    else if (Boolean.class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getBoolean());
+    }
+    else if (String[].class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getStrings());
+    }
+    else if (int[].class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getInts());
+    }
+    else if (long[].class.equals(type))
+    {
+      setValueAccess(values -> (T)values.getLongs());
+    }
   }
 }
