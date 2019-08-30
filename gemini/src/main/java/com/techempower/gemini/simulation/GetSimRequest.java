@@ -52,6 +52,22 @@ public class GetSimRequest
     super(simulation, url, parameters, client, application);
   }
 
+  /**
+   * Constructs a new simulated GET request with the given parameters.
+   *
+   * @param simulation the simulation
+   * @param url the URL of the request
+   * @param parameters the query string parameters of the request
+   * @param client the client making the request
+   * @param application the application
+   */
+  public GetSimRequest(Simulation simulation, String url,
+      SimParameters parameters, SimClient client,
+      GeminiApplication application)
+  {
+    super(simulation, url, parameters, client, application);
+  }
+
   @Override
   public boolean isGet()
   {

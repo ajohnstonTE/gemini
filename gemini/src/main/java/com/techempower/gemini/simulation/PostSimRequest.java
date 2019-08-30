@@ -52,6 +52,22 @@ public class PostSimRequest
     super(simulation, url, parameters, client, application);
   }
 
+  /**
+   * Constructs a new simulated POST request with the given parameters.
+   *
+   * @param simulation the simulation
+   * @param url the URL of the request
+   * @param parameters the query string parameters of the request
+   * @param client the simulated client making the request
+   * @param application the application
+   */
+  public PostSimRequest(Simulation simulation, String url,
+      SimParameters parameters, SimClient client,
+      GeminiApplication application)
+  {
+    super(simulation, url, parameters, client, application);
+  }
+
   @Override
   public boolean isPost()
   {

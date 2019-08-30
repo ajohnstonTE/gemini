@@ -45,7 +45,7 @@ public abstract class SimRequest
   private final String                uri;
   private final String                requestSignature;
   private String                      queryString;
-  private Hashtable<String, String>   parameters;
+  private ISimParameters              parameters;
   private final List<SimCookie>       cookies             = new ArrayList<>();
   private String                      redirectURL;
   private boolean                     redirected          = false;
@@ -62,7 +62,23 @@ public abstract class SimRequest
    * @param application the application
    */
   public SimRequest(Simulation simulation, String url, 
-      Map<String, String> parameters, SimClient client, 
+      Map<String, String> parameters, SimClient client,
+      GeminiApplication application)
+  {
+    this(simulation, url, new SimParameters(parameters), client, application);
+  }
+
+  /**
+   * Constructs a new simulated web request with the given parameters.
+   *
+   * @param simulation the simulation
+   * @param url the url of the request
+   * @param parameters the query string parameters of the request
+   * @param client the simulation client
+   * @param application the application
+   */
+  public SimRequest(Simulation simulation, String url,
+      ISimParameters parameters, SimClient client,
       GeminiApplication application)
   {
     this.application     = application;
@@ -74,11 +90,11 @@ public abstract class SimRequest
     // so we need to process the path in this case.
     if(parameters == null)
     {
-      this.parameters = new Hashtable<>();
+      this.parameters = new SimParameters();
     }
     else
     {
-      this.parameters = new Hashtable<>(parameters);
+      this.parameters = parameters;
     }
     
     this.requestSignature = url;
@@ -91,7 +107,7 @@ public abstract class SimRequest
       for (String param : params)
       {
         String[] keyValuePair = param.split("=");
-        this.parameters.put(keyValuePair[0], keyValuePair[1]);
+        this.parameters.set(keyValuePair[0], keyValuePair[1]);
       }
     }
     
@@ -121,7 +137,9 @@ public abstract class SimRequest
   @Override
   public Enumeration<String> getParameterNames()
   {
-    return this.parameters.keys();
+    List<String> keys = new ArrayList<>();
+    this.parameters.keys().forEachRemaining(keys::add);
+    return Collections.enumeration(keys);
   }
 
   @Override
@@ -138,27 +156,31 @@ public abstract class SimRequest
   {
     if(value != null)
     {
-      this.parameters.put(name, value);
+      this.parameters.set(name, value);
     }
   }
 
   @Override
   public void removeParameter(String name)
   {
-    
+    this.parameters.delete(name);
   }
 
   @Override
   public void removeAllRequestValues()
   {
-    
+    Iterator<String> keys = this.parameters.keys();
+    while (keys.hasNext())
+    {
+      keys.next();
+      keys.remove();
+    }
   }
 
   @Override
   public String[] getParameterValues(String name)
   {
-    
-    return null;
+    return this.parameters.getAll(name);
   }
 
   @Override
