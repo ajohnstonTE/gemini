@@ -237,7 +237,7 @@ public class Field<T>
     }
     else if (Boolean.class.equals(type))
     {
-      setValueAccess(values -> (T)values.getBoolean());
+      setValueAccess(values -> (T)values.getBooleanLenient());
     }
     else if (String[].class.equals(type))
     {
