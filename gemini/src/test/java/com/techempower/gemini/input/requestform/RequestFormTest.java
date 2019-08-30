@@ -17,17 +17,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RequestFormTest
 {
-
-
   static class DeclaredRequestFormSubclass extends RequestForm
   {
     public Field<String> field = new Field<>(this, "foo", String.class)
         .setRequired(true)
-        // TODO: Rename default value to something like 'nullDefault'
         .setValueAccess(ValueAccess::getString, "dog");
   }
 
