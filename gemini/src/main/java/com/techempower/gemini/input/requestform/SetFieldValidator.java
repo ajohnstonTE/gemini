@@ -50,10 +50,6 @@ public class SetFieldValidator<T>
       {
         input.addError(getElementName(), message);
       }
-      if (!getField().isMultivalued() && values.size() > 1)
-      {
-        input.addError(getElementName(), message);
-      }
     }
     else
     {
