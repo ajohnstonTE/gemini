@@ -24,7 +24,6 @@ public class Field<T>
   private Function<ValueAccess, T> valueAccess;
   private T                        value;
   private T                        defaultOnProcess;
-  private boolean                  multivalued;
 
   public Field(IRequestForm contract, String name, Class<T> type)
   {
@@ -72,32 +71,6 @@ public class Field<T>
   {
     this.required = required;
     return this;
-  }
-
-  @Override
-  public boolean isMultivalued()
-  {
-    return multivalued;
-  }
-
-  @Override
-  public Field<T> setMultivalued(boolean multivalued)
-  {
-    this.multivalued = multivalued;
-    return this;
-  }
-
-  @Override
-  public List<Validator> getStandardValidators()
-  {
-    List<Validator> validators = new ArrayList<>();
-    if (isRequired())
-    {
-      validators.add(new RequiredFieldValidator()
-          .setField(this)
-          .asValidator());
-    }
-    return validators;
   }
 
   @Override
@@ -160,7 +133,8 @@ public class Field<T>
   }
 
   @Override
-  public Field<T> setValueAccess(Function<ValueAccess, T> valueAccess, T defaultValue)
+  public Field<T> setValueAccess(Function<ValueAccess, T> valueAccess,
+                                 T defaultValue)
   {
     IField.super.setValueAccess(valueAccess, defaultValue);
     return this;

@@ -42,7 +42,8 @@ public class SetFieldValidator<T>
   {
     final T actualValue = getValue(input);
     String message = getElementName() + " must be a permitted value.";
-    if (actualValue != null && (actualValue instanceof Iterable || actualValue.getClass().isArray()))
+    if (actualValue != null && (actualValue instanceof Iterable ||
+        actualValue.getClass().isArray()))
     {
       List<String> values = new RequestFormHelper().valueToList(actualValue);
       if (values.stream().anyMatch(value -> !permitted.contains(value)))

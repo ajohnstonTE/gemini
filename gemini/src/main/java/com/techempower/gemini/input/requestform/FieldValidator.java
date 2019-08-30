@@ -30,7 +30,7 @@ public abstract class FieldValidator<T>
    * Should be called by the field when adding it. This is to allow field
    * validators to be added during definition chains.
    *
-   * @param field
+   * @param field - the field to associate with
    */
   protected FieldValidator<T> setField(IField<T> field)
   {

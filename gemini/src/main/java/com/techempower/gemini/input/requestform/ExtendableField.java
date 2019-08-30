@@ -36,13 +36,6 @@ public abstract class ExtendableField<T, S extends ExtendableField<T, S>>
   }
 
   @Override
-  public S setMultivalued(boolean multivalued)
-  {
-    super.setMultivalued(multivalued);
-    return self();
-  }
-
-  @Override
   public S setValueAccess(Function<ValueAccess, T> valueAccess)
   {
     super.setValueAccess(valueAccess);
