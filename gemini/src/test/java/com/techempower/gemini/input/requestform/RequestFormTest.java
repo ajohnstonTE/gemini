@@ -3,121 +3,220 @@ package com.techempower.gemini.input.requestform;
 import com.techempower.data.ConnectorFactory;
 import com.techempower.gemini.*;
 import com.techempower.gemini.context.Attachments;
-import com.techempower.gemini.input.Input;
 import com.techempower.gemini.monitor.GeminiMonitor;
 import com.techempower.gemini.mustache.MustacheManager;
 import com.techempower.gemini.pyxis.BasicUser;
 import com.techempower.gemini.session.SessionManager;
 import com.techempower.gemini.simulation.GetSimRequest;
 import com.techempower.gemini.simulation.SimClient;
-import org.junit.Test;
+import com.techempower.gemini.simulation.SimParameters;
+import com.techempower.log.ComponentLog;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.*;
 
 public class RequestFormTest
 {
-  @Test
-  public void testAnonymousSubclass()
-  {
-    class RequestFormSubclass extends RequestForm
-    {
-      public Field field = new Field<>(this,"foo", String.class)
-          .setRequired(true)
-          .setValueAccess(ValueAccess::getString, "dog");
-    }
-    RequestFormSubclass contract = new RequestFormSubclass();
 
-    assertEquals(
-        Collections.singletonList(contract.field),
-        contract.getFields());
-  }
 
   static class DeclaredRequestFormSubclass extends RequestForm
   {
     public Field<String> field = new Field<>(this, "foo", String.class)
         .setRequired(true)
-        // TODO: Remove need for value access for base types.
         // TODO: Rename default value to something like 'nullDefault'
         .setValueAccess(ValueAccess::getString, "dog");
   }
 
-  @Test
-  public void testDeclaredSubclass()
+  public static Object[] testBaseTypeParams()
   {
+    return new Object[][]{
+        {Long.class, "7", 7L},
+        {Long.class, null, null},
+        {Long.class, "", null},
+        {Long.class, "7.7", null},
+        {Long.class, "0", 0L},
+        {Long.class, "0.0", null},
+        {Long.class, "3.0", null},
+        {Long.class, "-1", -1L},
+        {Long.class, String.valueOf(Long.MAX_VALUE), Long.MAX_VALUE},
 
-    DeclaredRequestFormSubclass contract = new DeclaredRequestFormSubclass();
+        {Integer.class, "7", 7},
+        {Integer.class, null, null},
+        {Integer.class, "", null},
+        {Integer.class, "7.7", null},
+        {Integer.class, "0", 0},
+        {Integer.class, "0.0", null},
+        {Integer.class, "3.0", null},
+        {Integer.class, "-1", -1},
+        {Integer.class, String.valueOf(Integer.MAX_VALUE), Integer.MAX_VALUE},
+        {Integer.class, String.valueOf(Long.MAX_VALUE), null},
 
-    assertEquals(
-        Collections.singletonList(contract.field),
-        contract.getFields());
+        {Float.class, "7", 7f},
+        {Float.class, null, null},
+        {Float.class, "", null},
+        {Float.class, "7.7", 7.7f},
+        {Float.class, "0", 0f},
+        {Float.class, "0.0", 0.0f},
+        {Float.class, "3.0", 3.0f},
+        {Float.class, "-1", -1f},
+        {Float.class, String.valueOf(Float.MAX_VALUE), Float.MAX_VALUE},
+        {Float.class, String.valueOf(Long.MAX_VALUE), (float) Long.MAX_VALUE},
+
+        {Double.class, "7", 7d},
+        {Double.class, null, null},
+        {Double.class, "", null},
+        {Double.class, "7.7", 7.7d},
+        {Double.class, "0", 0d},
+        {Double.class, "0.0", 0.0d},
+        {Double.class, "3.0", 3.0d},
+        {Double.class, "-1", -1d},
+        {Double.class, String.valueOf(Double.MAX_VALUE), Double.MAX_VALUE},
+        {Double.class, String.valueOf(Long.MAX_VALUE), (double) Long.MAX_VALUE},
+
+        {Byte.class, "7", (byte) 7},
+        {Byte.class, null, null},
+        {Byte.class, "", null},
+        {Byte.class, "7.7", null},
+        {Byte.class, "0", (byte) 0},
+        {Byte.class, "0.0", null},
+        {Byte.class, "3.0", null},
+        {Byte.class, "-1", (byte) -1},
+        {Byte.class, String.valueOf(Byte.MAX_VALUE), Byte.MAX_VALUE},
+        {Byte.class, String.valueOf(Long.MAX_VALUE), null},
+
+        {Short.class, "7", (short) 7},
+        {Short.class, null, null},
+        {Short.class, "", null},
+        {Short.class, "7.7", null},
+        {Short.class, "0", (short) 0},
+        {Short.class, "0.0", null},
+        {Short.class, "3.0", null},
+        {Short.class, "-1", (short) -1},
+        {Short.class, String.valueOf(Short.MAX_VALUE), Short.MAX_VALUE},
+        {Short.class, String.valueOf(Long.MAX_VALUE), null},
+
+        {String.class, "7", "7"},
+        {String.class, null, null},
+        {String.class, "", ""},
+        {String.class, "7.7", "7.7"},
+        {String.class, "0", "0"},
+        {String.class, "0.0", "0.0"},
+        {String.class, "3.0", "3.0"},
+        {String.class, "-1", "-1"},
+        {String.class, String.valueOf(Long.MAX_VALUE), String.valueOf(Long.MAX_VALUE)},
+
+        {Boolean.class, "true", true},
+        {Boolean.class, "yes", true},
+        {Boolean.class, "1", true},
+        {Boolean.class, "y", true},
+        {Boolean.class, "on", true},
+        {Boolean.class, "false", false},
+        {Boolean.class, "no", false},
+        {Boolean.class, "0", false},
+        {Boolean.class, "n", false},
+        {Boolean.class, "off", false},
+        {Boolean.class, null, null},
+        {Boolean.class, "", null},
+        {Boolean.class, " ", null},
+        {Boolean.class, "7.7", null},
+        {Boolean.class, "0.0", null},
+        {Boolean.class, "3.0", null},
+        {Boolean.class, "-1", null},
+    };
   }
 
-  @Test
-  public void doPerformanceTest()
+  @ParameterizedTest
+  @MethodSource("testBaseTypeParams")
+  public <T> void testBaseTypes(Class<T> fieldType, String inputValue, T expected)
   {
-    doPerformanceTest(10_000);
-    doPerformanceTest(100_000);
-    doPerformanceTest(1_000_000);
-    doPerformanceTest(10_000_000);
-    doPerformanceTest(100_000_000);
-    //doPerformanceTest(1_000_000_000);
-  }
-
-  private void doPerformanceTest(int rounds)
-  {
-    long start = System.currentTimeMillis();
-    for (int i = 0; i < rounds; i++)
     {
-      testAnonymousSubclass();
+      class SingleFieldForm extends RequestForm
+      {
+        Field<T> field = new Field<>(this, "example", fieldType);
+      }
+      SingleFieldForm form = new SingleFieldForm();
+      assertTrue(form.process(ctx("example", inputValue)).passed());
+      assertEquals(expected, form.field.getValue());
     }
-    System.out.println(String.format(
-        "Basic anonymous subclass took %sms do to %s round%s",
-        System.currentTimeMillis() - start,
-        rounds,
-        rounds == 1 ? "" : "s"
-    ));
-    start = System.currentTimeMillis();
-    for (int i = 0; i < rounds; i++)
+  }
+
+  public static Object[] testBaseArrayTypeParams()
+  {
+    return new Object[][]{
+        {String[].class, new String[]{"true", "false"}, new String[]{"true", "false"}},
+        {String[].class, new String[]{"0", "1"}, new String[]{"0", "1"}},
+        {String[].class, new String[]{"null", ""}, new String[]{"null", ""}},
+        {String[].class, new String[]{"null", "21"}, new String[]{"null", "21"}},
+        {String[].class, new String[]{"null", "2.1"}, new String[]{"null", "2.1"}},
+        {String[].class, new String[]{"null", "-4"}, new String[]{"null", "-4"}},
+        {String[].class, null, new String[0]},
+        {String[].class, new String[0], new String[0]},
+
+        {int[].class, new String[]{"true", "false"}, new int[]{0, 0}},
+        {int[].class, new String[]{"0", "1"}, new int[]{0, 1}},
+        {int[].class, new String[]{"null", ""}, new int[]{0, 0}},
+        {int[].class, new String[]{"null", "21"}, new int[]{0, 21}},
+        {int[].class, new String[]{"null", "2.1"}, new int[]{0, 0}},
+        {int[].class, new String[]{"null", "-4"}, new int[]{0, -4}},
+        {int[].class, null, new int[0]},
+        {int[].class, new String[0], new int[0]},
+
+        {long[].class, new String[]{"true", "false"}, new long[]{0, 0}},
+        {long[].class, new String[]{"0", "1"}, new long[]{0, 1}},
+        {long[].class, new String[]{"null", ""}, new long[]{0, 0}},
+        {long[].class, new String[]{"null", "21"}, new long[]{0, 21}},
+        {long[].class, new String[]{"null", "2.1"}, new long[]{0, 0}},
+        {long[].class, new String[]{"null", "-4"}, new long[]{0, -4}},
+        {long[].class, null, new long[0]},
+        {long[].class, new String[0], new long[0]},
+    };
+  }
+
+  @ParameterizedTest
+  @MethodSource("testBaseArrayTypeParams")
+  public <T> void testBaseArrayTypes(Class<T> fieldType, String[] inputValues, T expected)
+  {
     {
-      testDeclaredSubclass();
+      class SingleFieldForm extends RequestForm
+      {
+        Field<T> field = new Field<>(this, "example", fieldType);
+      }
+      SingleFieldForm form = new SingleFieldForm();
+      assertTrue(form.process(ctx("example", inputValues)).passed());
+      assertTrue(Objects.deepEquals(expected, form.field.getValue()));
     }
-    System.out.println(String.format(
-        "Basic declared subclass took %sms do to %s round%s",
-        System.currentTimeMillis() - start,
-        rounds,
-        rounds == 1 ? "" : "s"
-    ));
   }
 
-  static class TestForm extends RequestForm
+  private Context ctx(String key, String value)
   {
-    Field<Long> entityId = new Field<>(this, "entity-id", Long.class)
-        .setRequired(true);
-    Field<Double> doubleField = new NumberField<>(this, "double-field", Double.class)
-        .setRequired(true)
-        .setMin(4d)
-        .setMax(10.5d);
+    SimParameters parameters = new SimParameters();
+    if (value != null)
+    {
+      parameters.append(key, value);
+    }
+    return context(parameters);
   }
 
-  @Test
-  public void doTest()
+  private Context ctx(String key, String[] values)
   {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("entity-id", "7");
-    parameters.put("double-field", "8");
-    Context context = createContext(parameters);
-    TestForm testForm = new TestForm();
-    Input input = testForm.process(context);
-    assertTrue(input.passed());
-    assertEquals((Long)7L, testForm.entityId.getValue());
-    assertEquals((Double) 8d, testForm.doubleField.getValue());
+    SimParameters parameters = new SimParameters();
+    if (values != null)
+    {
+      for (String value : values)
+      {
+        if (value != null)
+        {
+          parameters.append(key, value);
+        }
+      }
+    }
+    return context(parameters);
   }
 
-  private Context createContext(Map<String, String> parameters)
+  private Context context(SimParameters parameters)
   {
     GeminiApplication application = new GeminiApplication()
     {
@@ -156,6 +255,32 @@ public class RequestFormTest
       {
         return null;
       }
+
+      @Override
+      public ComponentLog getLog(String componentCode)
+      {
+        return new ComponentLog(getApplicationLog(), componentCode) {
+          @Override
+          public void log(String logString, int debugLevel)
+          {
+          }
+
+          @Override
+          public void log(String logString)
+          {
+          }
+
+          @Override
+          public void log(String debugString, int debugLevel, Throwable exception)
+          {
+          }
+
+          @Override
+          public void log(String debugString, Throwable exception)
+          {
+          }
+        };
+      }
     };
     Simulation simulation = new Simulation()
     {
@@ -180,7 +305,7 @@ public class RequestFormTest
     SimClient simClient = new SimClient(1);
     Request request = new GetSimRequest(simulation, "", parameters, simClient,
         application);
-    Context context = new Context(application, request)
+    return new Context(application, request)
     {
       @Override
       public Attachments files()
@@ -188,6 +313,7 @@ public class RequestFormTest
         return null;
       }
     };
-    return context;
   }
+
+
 }

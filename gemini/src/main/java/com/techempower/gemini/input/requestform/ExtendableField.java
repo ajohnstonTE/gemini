@@ -50,9 +50,9 @@ public abstract class ExtendableField<T, S extends ExtendableField<T, S>>
   }
 
   @Override
-  public S setDefaultValue(T defaultValue)
+  public S setDefaultOnProcess(T defaultOnProcess)
   {
-    super.setDefaultValue(defaultValue);
+    super.setDefaultOnProcess(defaultOnProcess);
     return self();
   }
 

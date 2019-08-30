@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * A field in a contract. Associated with zero or more validators. Partially a minimal version of legacy Gemini form
- * elements, using the input system, but with certain changes to allow for greater flexibility in certain areas. No
- * rendering included. Intended to be used in conjunction with the JSP forms tags, though most likely compatible with
- * any/all templating languages.
- *
- * @author ajohnston
+ * A field in a contract. Associated with zero or more validators. Partially a
+ * minimal version of legacy Gemini form elements, using the input system, but
+ * with certain changes to allow for greater flexibility in certain areas. No
+ * rendering included. Intended to be used in conjunction with the JSP forms
+ * tags, though most likely compatible with any/all templating languages.
  */
 public class Field<T>
     implements IField<T>
@@ -24,7 +23,7 @@ public class Field<T>
   private boolean                  required;
   private Function<ValueAccess, T> valueAccess;
   private T                        value;
-  private T                        defaultValue;
+  private T                        defaultOnProcess;
   private boolean                  multivalued;
 
   public Field(IRequestForm contract, String name, Class<T> type)
@@ -104,8 +103,7 @@ public class Field<T>
   @Override
   public List<Validator> getValidators()
   {
-    List<Validator> validators = new ArrayList<>();
-    validators.addAll(getCustomValidators());
+    List<Validator> validators = new ArrayList<>(getCustomValidators());
     List<Validator> standardValidators = getStandardValidators();
     if (standardValidators != null)
     {
@@ -122,16 +120,16 @@ public class Field<T>
   }
 
   @Override
-  public Field<T> setDefaultValue(T defaultValue)
+  public Field<T> setDefaultOnProcess(T defaultOnProcess)
   {
-    this.defaultValue = defaultValue;
+    this.defaultOnProcess = defaultOnProcess;
     return this;
   }
 
   @Override
-  public T getDefaultValue()
+  public T getDefaultOnProcess()
   {
-    return defaultValue;
+    return defaultOnProcess;
   }
 
   @Override
