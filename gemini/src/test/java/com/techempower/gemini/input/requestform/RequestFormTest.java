@@ -11,6 +11,7 @@ import com.techempower.gemini.simulation.GetSimRequest;
 import com.techempower.gemini.simulation.SimClient;
 import com.techempower.gemini.simulation.SimParameters;
 import com.techempower.log.ComponentLog;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -187,6 +188,99 @@ public class RequestFormTest
       SingleFieldForm form = new SingleFieldForm();
       assertTrue(form.process(ctx("example", inputValues)).passed());
       assertTrue(Objects.deepEquals(expected, form.field.getValue()));
+    }
+  }
+
+  @Test
+  public void testNumberField()
+  {
+    {
+      class SingleLongNumberFieldForm extends RequestForm
+      {
+        Field<Long> field = new NumberField<>(this, "example", Long.class)
+            .setMin(0L)
+            .setMax(2L);
+      }
+      {
+        SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
+        assertTrue(form.process(ctx("example", "4")).failed());
+      }
+      {
+        SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
+        assertTrue(form.process(ctx("example", "2")).passed());
+        assertEquals((Long) 2L, form.field.getValue());
+      }
+      {
+        SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
+        assertTrue(form.process(ctx("example", "0")).passed());
+        assertEquals((Long) 0L, form.field.getValue());
+      }
+      {
+        SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
+        assertTrue(form.process(ctx("example", "0.0")).failed());
+      }
+    }
+    {
+      class SingleFloatNumberFieldForm extends RequestForm
+      {
+        Field<Float> field = new NumberField<>(this, "example", Float.class)
+            .setMax(1.5f)
+            .setMin(20f);
+        {
+          SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
+          assertTrue(form.process(ctx("example", "4")).passed());
+          assertEquals((Float)4f, form.field.getValue());
+        }
+        {
+          SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
+          assertTrue(form.process(ctx("example", "0.0")).passed());
+          assertEquals((Float)0f, form.field.getValue());
+        }
+        {
+          SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
+          assertTrue(form.process(ctx("example", "-0.1")).failed());
+        }
+        {
+          SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
+          assertTrue(form.process(ctx("example", "20")).passed());
+          assertEquals((Float)20f, form.field.getValue());
+        }
+        {
+          SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
+          assertTrue(form.process(ctx("example", "2er0")).failed());
+        }
+      }
+    }
+    {
+      class SingleDoubleNumberFieldForm extends RequestForm
+      {
+        Field<Double> field = new NumberField<>(this, "example", Double.class)
+            .setMax(1.5d)
+            .setMin(20d);
+        {
+          SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
+          assertTrue(form.process(ctx("example", "4")).passed());
+          assertEquals((Double)4d, form.field.getValue());
+        }
+        {
+          SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
+          assertTrue(form.process(ctx("example", "0.0")).passed());
+          assertEquals((Double)0d, form.field.getValue());
+        }
+        {
+          SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
+          assertTrue(form.process(ctx("example", "-0.1")).failed());
+        }
+        {
+          SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
+          assertTrue(form.process(ctx("example", "20")).passed());
+          assertEquals((Double)20d, form.field.getValue());
+        }
+        {
+          SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
+          assertTrue(form.process(ctx("example", "2er0")).failed());
+        }
+      }
     }
   }
 
