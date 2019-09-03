@@ -26,6 +26,7 @@ class BasicExampleHandler extends MethodUriHandler<Context>
       return json();
     }
     long entityId = input.values().getLong("entity-id");
+    // ...rest of the method...
   }
 ```
 
@@ -53,6 +54,7 @@ class BasicExampleHandler extends MethodUriHandler<Context>
       return json();
     }
     long entityId = form.entityId.getValue();
+    // ...rest of the method...
   }
 }
 ```
@@ -79,15 +81,17 @@ class PreprocessingHandler extends MethodUriHandler<Context>
   public boolean handleRequestForm(ExampleForm form)
   {
     long entityId = form.entityId.getValue();
+    // ...rest of the method...
   }
 }
 ```
 
 In the above example, the form would be automatically instantiated, evaluated, 
 and populated. Based on the presence of the `@JsonResponse` annotation, the
-response would be a JSON error on validation failure. The annotation doesn't 
-exist, but that's the idea. Some variation of that. And if you wanted to 
-combine two forms, you could do the following:
+response would be a JSON error on validation failure. It would be optional 
+though. it essentially tells the handler how to respond if the `Accept` header 
+isn't set. The annotation doesn't exist, but that's the idea. Some variation of
+that. And if you wanted to combine two forms, you could do the following:
 
 ```java
 class PreprocessingHandler extends MethodUriHandler<Context>
@@ -124,6 +128,7 @@ class PreprocessingHandler extends MethodUriHandler<Context>
   {
     long entityId = firstForm.entityId.getValue();
     LocalDate date = secondForm.date.getValue();
+    // ...rest of the method...
   }
 }
 ```
