@@ -64,7 +64,7 @@ public class PostSimRequest
    * @param application the application
    */
   public PostSimRequest(Simulation simulation, String url,
-                        SimParameters parameters, SimClient client,
+                        ISimParameters parameters, SimClient client,
                         GeminiApplication application)
   {
     super(simulation, url, parameters, client, application);

@@ -8,6 +8,7 @@ import com.techempower.gemini.mustache.MustacheManager;
 import com.techempower.gemini.pyxis.BasicUser;
 import com.techempower.gemini.session.SessionManager;
 import com.techempower.gemini.simulation.GetSimRequest;
+import com.techempower.gemini.simulation.ISimParameters;
 import com.techempower.gemini.simulation.SimClient;
 import com.techempower.gemini.simulation.SimParameters;
 import com.techempower.log.ComponentLog;
@@ -308,7 +309,7 @@ public class RequestFormTest
     return context(parameters);
   }
 
-  private Context context(SimParameters parameters)
+  private Context context(ISimParameters parameters)
   {
     GeminiApplication application = new GeminiApplication()
     {
