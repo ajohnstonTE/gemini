@@ -89,7 +89,7 @@ class PreprocessingHandler extends MethodUriHandler<Context>
 In the above example, the form would be automatically instantiated, evaluated, 
 and populated. Based on the presence of the `@JsonResponse` annotation, the
 response would be a JSON error on validation failure. It would be optional 
-though. it essentially tells the handler how to respond if the `Accept` header 
+though. It essentially tells the handler how to respond if the `Accept` header 
 isn't set. The annotation doesn't exist, but that's the idea. Some variation of
 that. And if you wanted to combine two forms, you could do the following:
 
