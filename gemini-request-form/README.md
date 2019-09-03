@@ -167,7 +167,7 @@ The above would \*ideally\* be capable of deconstructing JSON that looked like:
 {
   "some-text": "foo",
   "action-data": {
-    "entity-ids": [ 1, 2, 3 ]
+    "entity-ids": [ 1, 2, 3 ],
     "delete": true
   }
 }
