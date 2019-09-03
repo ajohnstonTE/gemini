@@ -45,6 +45,7 @@
     <module>gemini-jdbc</module>
     <module>gemini-hikaricp</module>
     <module>gemini-jndi</module>
+    <module>gemini-request-form</module>
   </modules>
 
   <properties>

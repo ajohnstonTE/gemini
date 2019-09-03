@@ -26,11 +26,16 @@
  *******************************************************************************/
 package com.techempower.gemini.simulation;
 
-import java.io.*;
-import java.util.*;
-
 import com.techempower.gemini.*;
-import com.techempower.gemini.session.*;
+import com.techempower.gemini.session.Session;
+import com.techempower.gemini.simulation.SimClient;
+import com.techempower.gemini.simulation.SimCookie;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * A simulated web request.
@@ -38,14 +43,14 @@ import com.techempower.gemini.session.*;
 public abstract class SimRequest
     implements Request
 {
-  
-  private final GeminiApplication     application;
-  private final BasicInfrastructure   infrastructure;
+
+  private final GeminiApplication application;
+  private final BasicInfrastructure infrastructure;
   private String                      url;
   private final String                uri;
   private final String                requestSignature;
   private String                      queryString;
-  private Hashtable<String, String>   parameters;
+  private ISimParameters parameters;
   private final List<SimCookie>       cookies             = new ArrayList<>();
   private String                      redirectURL;
   private boolean                     redirected          = false;
@@ -61,28 +66,44 @@ public abstract class SimRequest
    * @param client the simulation client
    * @param application the application
    */
-  public SimRequest(Simulation simulation, String url, 
-      Map<String, String> parameters, SimClient client, 
-      GeminiApplication application)
+  public SimRequest(Simulation simulation, String url,
+                    Map<String, String> parameters, SimClient client,
+                    GeminiApplication application)
+  {
+    this(simulation, url, new SimParameters(parameters), client, application);
+  }
+
+  /**
+   * Constructs a new simulated web request with the given parameters.
+   *
+   * @param simulation the simulation
+   * @param url the url of the request
+   * @param parameters the query string parameters of the request
+   * @param client the simulation client
+   * @param application the application
+   */
+  public SimRequest(Simulation simulation, String url,
+                    ISimParameters parameters, SimClient client,
+                    GeminiApplication application)
   {
     this.application     = application;
     this.infrastructure  = this.application.getInfrastructure();
     //this.simulation      = simulation;
-    //this.clientID        = String.valueOf(client.getId()); 
-    
+    //this.clientID        = String.valueOf(client.getId());
+
     // the path can optionally look like /?cmd=login&username=admin
     // so we need to process the path in this case.
     if(parameters == null)
     {
-      this.parameters = new Hashtable<>();
+      this.parameters = new SimParameters();
     }
     else
     {
-      this.parameters = new Hashtable<>(parameters);
+      this.parameters = parameters;
     }
-    
+
     this.requestSignature = url;
-    
+
     String[] urlSplit = url.split("\\?");
     if(urlSplit.length > 1)
     {
@@ -91,37 +112,39 @@ public abstract class SimRequest
       for (String param : params)
       {
         String[] keyValuePair = param.split("=");
-        this.parameters.put(keyValuePair[0], keyValuePair[1]);
+        this.parameters.set(keyValuePair[0], keyValuePair[1]);
       }
     }
-    
+
     this.uri = this.url = urlSplit[0];
   }
-  
+
   @Override
   public void setCharacterEncoding(String encoding)
       throws UnsupportedEncodingException
   {
   }
-  
+
   @Override
   public Enumeration<String> getHeaderNames()
   {
-    
+
     return null;
   }
 
   @Override
   public String getHeader(String name)
   {
-    
+
     return null;
   }
 
   @Override
   public Enumeration<String> getParameterNames()
   {
-    return this.parameters.keys();
+    List<String> keys = new ArrayList<>();
+    this.parameters.keys().forEachRemaining(keys::add);
+    return Collections.enumeration(keys);
   }
 
   @Override
@@ -129,7 +152,7 @@ public abstract class SimRequest
   {
     return this.parameters.get(name);
   }
-  
+
   /**
    * Sets the request parameter, or overrides the parameter if it already exists
    */
@@ -138,27 +161,31 @@ public abstract class SimRequest
   {
     if(value != null)
     {
-      this.parameters.put(name, value);
+      this.parameters.set(name, value);
     }
   }
 
   @Override
   public void removeParameter(String name)
   {
-    
+    this.parameters.delete(name);
   }
 
   @Override
   public void removeAllRequestValues()
   {
-    
+    Iterator<String> keys = this.parameters.keys();
+    while (keys.hasNext())
+    {
+      keys.next();
+      keys.remove();
+    }
   }
 
   @Override
   public String[] getParameterValues(String name)
   {
-    
-    return null;
+    return this.parameters.getAll(name);
   }
 
   @Override
@@ -175,7 +202,7 @@ public abstract class SimRequest
   @Override
   public PrintWriter getWriter() throws IOException
   {
-    
+
     return null;
   }
 
@@ -190,18 +217,18 @@ public abstract class SimRequest
   {
     return path;
   }
-  
+
   @Override
   public StringBuffer getRequestURL()
   {
     return new StringBuffer(this.url);
   }
-  
+
   /**
    * Returns the request uri. this differs from the url in that
    * the url http://some-domain.com/admin/users would have a uri 
    * of admin/users
-   * 
+   *
    * For sim requests, we assume the url and uri are identical
    */
   @Override
@@ -221,13 +248,13 @@ public abstract class SimRequest
         return (C)cookie;
       }
     }
-    
+
     return null;
   }
 
   @Override
   public void setCookie(String name, String value, String domain,
-      String path, int age, boolean secure)
+                        String path, int age, boolean secure)
   {
     SimCookie cookie = new SimCookie(name, value, path, age, secure);
     this.cookies.add(cookie);
@@ -251,7 +278,7 @@ public abstract class SimRequest
   @Override
   public String getClientId()
   {
-    
+
     return null;
   }
 
@@ -272,7 +299,7 @@ public abstract class SimRequest
   @Override
   public boolean redirectPermanent(String redirectDestinationUrl)
   {
-    
+
     return false;
   }
 
@@ -284,10 +311,10 @@ public abstract class SimRequest
   @Override
   public OutputStream getOutputStream() throws IOException
   {
-    
+
     return null;
   }
-  
+
   @Override
   public Infrastructure getInfrastructure()
   {
@@ -303,46 +330,46 @@ public abstract class SimRequest
   public void setExpiration(int secondsFromNow)
   {
   }
-  
+
   @Override
   public String getCurrentURI()
   {
-    
+
     return null;
   }
-  
+
   @Override
   public boolean isSecure()
   {
-    
+
     return false;
   }
-  
+
   @Override
   public boolean isCommitted()
   {
-    
+
     return false;
   }
-  
+
   @Override
   public String getQueryString()
   {
     return this.queryString;
   }
-  
+
   // TODO: make this support multiple sessions
   @Override
   public Session getSession(boolean create)
   {
     return this.application.getSimSessionManager().getSession(this, create);
   }
-  
+
   @Override
   public void setAttribute(String name, Object o)
   {
   }
-  
+
   /**
    * Gets an attribute for this request
    */
@@ -356,7 +383,7 @@ public abstract class SimRequest
   {
     return this.redirectURL;
   }
-  
+
   public boolean redirected()
   {
     return this.redirected;
@@ -371,11 +398,11 @@ public abstract class SimRequest
   {
     return this.includedFile;
   }
-  
+
   @Override
   public void setStatus(int status)
   {
-    
+
   }
 
   @Override

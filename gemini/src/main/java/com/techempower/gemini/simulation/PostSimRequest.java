@@ -26,15 +26,17 @@
  *******************************************************************************/
 package com.techempower.gemini.simulation;
 
-import java.util.*;
+import com.techempower.gemini.GeminiApplication;
+import com.techempower.gemini.Simulation;
+import com.techempower.gemini.simulation.SimClient;
 
-import com.techempower.gemini.*;
+import java.util.Map;
 
 /**
  * A simulated POST-method web request.
  */
 public class PostSimRequest
-  extends SimRequest
+    extends SimRequest
 {
   /**
    * Constructs a new simulated POST request with the given parameters.
@@ -46,8 +48,24 @@ public class PostSimRequest
    * @param application the application
    */
   public PostSimRequest(Simulation simulation, String url,
-      Map<String, String> parameters, SimClient client,
-      GeminiApplication application)
+                        Map<String, String> parameters, SimClient client,
+                        GeminiApplication application)
+  {
+    super(simulation, url, parameters, client, application);
+  }
+
+  /**
+   * Constructs a new simulated POST request with the given parameters.
+   *
+   * @param simulation the simulation
+   * @param url the URL of the request
+   * @param parameters the query string parameters of the request
+   * @param client the simulated client making the request
+   * @param application the application
+   */
+  public PostSimRequest(Simulation simulation, String url,
+                        SimParameters parameters, SimClient client,
+                        GeminiApplication application)
   {
     super(simulation, url, parameters, client, application);
   }

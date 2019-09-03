@@ -203,7 +203,7 @@ public abstract class Simulation
   public boolean login(SimClient client, String username)
   {
     // setup
-    SimRequest request = new PostSimRequest(this, "", null, client, this.application); 
+    SimRequest request = new PostSimRequest(this, "", (SimParameters)null, client, this.application);
     final Context context = this.application.getContext(request);
     
     BasicUser user = null;
