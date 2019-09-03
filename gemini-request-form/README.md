@@ -131,3 +131,48 @@ class PreprocessingHandler extends MethodUriHandler<Context>
 Same as before, but both forms get pre-processed. With the above syntax, 
 Gemini gains the straight-to-parameters syntax of other modern libraries, while
 keeping the concept of re-useable validation constraints.
+
+
+### Very Distant Future Features
+
+Eventually, once JSON support is added for requests, support for deconstructing 
+and validating nested JSON objects will be added. Example:
+
+```java
+class DeconstructingJsonHandler extends MethodUriHandler<Context>
+{
+  class ExampleForm extends RequestForm
+  {
+    Field<String> someText = new Field<>(this, "some-text", String.class);
+    ObjectField actionData = new ObjectField(this, "action-data") {
+      Field<long[]> entityIds = new Field<>(objectField, "entity-ids", long[].class);
+      Field<Boolean> delete = new Field<>(objectField, "delete", Boolean.class);
+    };
+  }
+
+  @Path("request-form")
+  @JsonResponse
+  public boolean handleRequestForm(ExampleForm form)
+  {
+    String someText = form.someText.getValue();
+    long[] entityIds = form.actionData.entityIds.getValue();
+    boolean delete = form.actionData.delete.getValue();
+  }
+}
+``` 
+
+The above would \*ideally\* be capable of deconstructing JSON that looked like:
+
+```json
+{
+  "some-text": "foo",
+  "action-data": {
+    "entity-ids": [ 1, 2, 3 ]
+    "delete": true
+  }
+}
+```
+
+As it's written above, it wouldn't actually compile because 
+`form.actionData.entityIds` and `form.actionData.delete` wouldn't be 
+resolvable. But that's the general idea, at least.
