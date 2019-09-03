@@ -27,7 +27,13 @@ class BasicExampleHandler extends MethodUriHandler<Context>
     }
     long entityId = input.values().getLong("entity-id");
   }
+```
 
+And again, using request forms
+
+```java
+class BasicExampleHandler extends MethodUriHandler<Context>
+{
   class ExampleForm extends RequestForm
   {
     Field<Long> entityId = new Field<>(this, "entity-id", Long.class)
@@ -48,7 +54,6 @@ class BasicExampleHandler extends MethodUriHandler<Context>
     }
     long entityId = form.entityId.getValue();
   }
-
 }
 ```
 
@@ -76,7 +81,6 @@ class PreprocessingHandler extends MethodUriHandler<Context>
     long entityId = form.entityId.getValue();
   }
 }
-
 ```
 
 In the above example, the form would be automatically instantiated, evaluated, 
@@ -122,7 +126,6 @@ class PreprocessingHandler extends MethodUriHandler<Context>
     LocalDate date = secondForm.date.getValue();
   }
 }
-
 ```
 
 Same as before, but both forms get pre-processed. With the above syntax, 
