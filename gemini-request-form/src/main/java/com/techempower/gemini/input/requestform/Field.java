@@ -1,7 +1,6 @@
 package com.techempower.gemini.input.requestform;
 
-import com.techempower.gemini.input.Input;
-import com.techempower.gemini.input.Values;
+import com.techempower.gemini.input.*;
 import com.techempower.gemini.input.validator.Validator;
 
 import java.util.ArrayList;
@@ -26,14 +25,30 @@ public class Field<T>
   private Function<ValueAccess, T> valueAccess;
   private T                        value;
   private T                        defaultOnProcess;
+  private final IRequestForm       form;
+  private MutableValidation        validation;
 
   public Field(IRequestForm form, String name, Class<T> type)
   {
+    this.form = form;
     this.name = name;
     this.customValidators = new ArrayList<>();
     this.type = type;
     this.determineDefaultValueAccess();
-    form.addField(this);
+    this.form().addField(this);
+  }
+
+  protected IRequestForm form()
+  {
+    return form;
+  }
+
+  public <V> DerivedField<T, V> derive(Class<V> type,
+                                       Function<T, V> derivation)
+  {
+    DerivedField<T, V> field = new DerivedField<>(this, type, derivation);
+    this.form().addField(field);
+    return field;
   }
 
   @Override
@@ -73,6 +88,17 @@ public class Field<T>
   public Class<T> getType()
   {
     return type;
+  }
+
+  @Override
+  public Validation validation()
+  {
+    if (validation == null)
+    {
+      return new BasicValidation();
+    }
+    throw new UnsupportedOperationException();
+    //return new WatchedMutableValidation();
   }
 
   @Override

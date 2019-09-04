@@ -38,26 +38,23 @@ import com.techempower.js.legacy.*;
  * A representation of input, composed of the user-provided values and any
  * validation errors raised by validators.  This is not instantiated directly
  * by applications, but rather provided as a result of processing a set of
- * validators via an instance of ValidatorSet. 
+ * validators via an instance of ValidatorSet.
  */
 public class Input
-  implements JavaScriptObject
+  implements MutableValidation
 {
   //
   // Variables.
   //
 
-  private final Context       context;
-  private final Query         query;
-  private int                 statusCode = 400;
-  private List<String>        errorMessages;
-  private Map<String, Object> erroredElements;
-  private Object              auxiliary;
-  
+  private final Context                context;
+  private final Query                  query;
+  private final BasicMutableValidation internalValidation;
+
   //
   // Methods.
   //
-  
+
   /**
    * Constructor.
    */
@@ -65,8 +62,9 @@ public class Input
   {
     this.context = context;
     this.query = context.query();
+    this.internalValidation = new BasicMutableValidation();
   }
-  
+
   /**
    * Gets the input values.
    */
@@ -74,7 +72,7 @@ public class Input
   {
     return query;
   }
-  
+
   /**
    * Gets the Context.
    */
@@ -82,146 +80,114 @@ public class Input
   {
     return context;
   }
-  
+
   /**
    * Gets the list of error messages.
    */
   @JsonProperty("errors")
+  @Override
   public List<String> errors()
   {
-    return errorMessages;
+    return internalValidation.errors();
   }
-  
+
   /**
    * Gets the map of elements in error.
    */
   @JsonProperty("elements")
+  @Override
   public Map<String, Object> erroredElements()
   {
-    return erroredElements;
+    return internalValidation.erroredElements();
   }
-  
+
   /**
    * Adds an error that is not tied to a specific element.
-   * 
+   *
    * @param errorMessage is typically a String, but can optionally be any
-   *        other type that can be serialized to JSON and rendered in a 
+   *        other type that can be serialized to JSON and rendered in a
    *        template.
    */
+  @Override
   public Input addError(final String errorMessage)
   {
-    if (errorMessages == null)
-    {
-      errorMessages = new ArrayList<>(10);
-    }
-    
-    errorMessages.add(errorMessage);
-    
+    internalValidation.addError(errorMessage);
+
     return this;
   }
-  
+
   /**
    * Adds an element that is in error.  If an element is already in error
    * for another reason (already present in this Result), the new message
    * will still be added.
-   * 
+   *
    * @param errorMessage A message describing the validation error.
    */
+  @Override
   public Input addError(final String element, final String errorMessage)
   {
-    return addError(element, errorMessage, true);
+    internalValidation.addError(element, errorMessage);
+
+    return this;
   }
-  
+
   /**
    * Adds an element that is in error.
-   * 
+   *
    * @param element the element's identity string/name.
    * @param errorMessage A message describing the validation error.
    * @param addIfElementAlreadyPresent If the element is already in error
    *        for some other reason (already present in this Result), should
    *        this new message be added?
    */
+  @Override
   public Input addError(
       final String element,
       final String errorMessage,
       final boolean addIfElementAlreadyPresent)
   {
-    if (erroredElements == null)
-    {
-      erroredElements = new HashMap<>(10);
-    }
+    internalValidation.addError(element, errorMessage,
+        addIfElementAlreadyPresent);
 
-    // Capture single errors per element as plain Strings, and promote
-    // multiple errors per element into Lists of Strings.
-    final Object contained = erroredElements.get(element);
-    if (contained == null)
-    {
-      erroredElements.put(element, errorMessage);
-    }
-    else if (  (contained instanceof String)
-            && (addIfElementAlreadyPresent)
-            )
-    {
-      final List<String> list = new ArrayList<>(10);
-      list.add((String)contained);
-      list.add(errorMessage);
-      erroredElements.put(element, list);
-    }
-    else if (  (contained instanceof List<?>)
-            && (addIfElementAlreadyPresent)
-            )
-    {
-      @SuppressWarnings("unchecked")
-      final List<String> list = (List<String>)contained;
-      list.add(errorMessage);
-    }
-
-    addError(errorMessage);
-    
     return this;
   }
-  
+
   /**
    * Sets the HTTP status code to something specific.  The default is 400
    * ("bad request").
    */
+  @Override
   public Input setStatusCode(int statusCode)
   {
-    this.statusCode = statusCode;
+    internalValidation.setStatusCode(statusCode);
     return this;
   }
-  
+
   /**
    * Gets the HTTP status code.  The default is 400 ("bad request").
    */
   @JsonIgnore
+  @Override
   public int getStatusCode()
   {
-    return this.statusCode;
+    return internalValidation.getStatusCode();
   }
-  
-  /**
-   * Are there no errors?
-   */
-  public boolean passed()
-  {
-    return (errorMessages == null);
-  }
-  
+
   /**
    * Are there any errors?
    */
+  @Override
   public boolean failed()
   {
     return (!passed());
   }
-  
+
   @Override
   public String toString()
   {
     return "Validation.Result ["
         + (passed() ? "Good; " : "Bad; ")
-        + CollectionHelper.toString(errorMessages, ";")
+        + CollectionHelper.toString(errors(), ";")
         + "]";
   }
 
@@ -229,43 +195,20 @@ public class Input
    * Return the auxiliary object reference.
    */
   @JsonProperty("aux")
+  @Override
   public Object getAuxiliary()
   {
-    return auxiliary;
+    return internalValidation.getAuxiliary();
   }
 
   /**
    * Set the auxiliary object reference.
    */
+  @Override
   public Input setAuxiliary(final Object auxiliary)
   {
-    this.auxiliary = auxiliary;
-    
+    internalValidation.setAuxiliary(auxiliary);
+
     return this;
   }
-
-  private static final VisitorFactory<Input> VISITOR_FACTORY = 
-      new VisitorFactory<Input>()
-  {
-    @Override
-    public Visitor visitor(Input result)
-    {
-      return Visitors.map(
-          "errors", result.errors(),
-          "elements", result.erroredElements(),
-          "aux", result.getAuxiliary()
-          );
-    }
-  };
-  
-  /**
-   * Get a VisitorFactory for writing Validation Results to JavaScript.
-   */
-  @Override
-  @JsonIgnore
-  public VisitorFactory<Input> getJsVisitorFactory()
-  {
-    return VISITOR_FACTORY;
-  }
-
 }
