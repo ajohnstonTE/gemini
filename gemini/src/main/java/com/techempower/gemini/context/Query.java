@@ -46,7 +46,7 @@ public class   Query
    * The override map is lazy-initialized and typically only used when an
    * Input Processor mutates user input.
    */
-  private Map<String, String> override;
+  protected Map<String, String> override;
   
   /**
    * Constructor.

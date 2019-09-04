@@ -1,5 +1,8 @@
 package com.techempower.gemini.input;
 
+import com.techempower.gemini.context.CopiedQuery;
+import com.techempower.gemini.context.Query;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,14 +10,21 @@ import java.util.Map;
 public class SyncedInput
     extends Input
 {
-  private final Input syncedInput;
+  private final Input       syncedInput;
+  private final CopiedQuery query;
 
   public SyncedInput(Input syncedInput)
   {
     super(syncedInput.context());
-    if (true) throw new UnsupportedOperationException(
-        "Query still needs to be \"isolated\"/synced/copied");
     this.syncedInput = syncedInput;
+    this.query = new CopiedQuery(syncedInput.context().getRequest(),
+        syncedInput.values());
+  }
+
+  @Override
+  public Query values()
+  {
+    return query;
   }
 
   @Override
