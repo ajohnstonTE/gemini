@@ -57,6 +57,10 @@ public class RequestForm
 
   protected ValidatorSet getValidatorSet()
   {
+    if (true) throw new UnsupportedOperationException(
+        "Fields need to be told validation is starting, then be given the" +
+            " input being processed. This validator set method can pretty " +
+            "much go away. Still, double check that it isn't used in TMPT.");
     Stream<Validator> fieldValidators = this.getFields()
         .stream()
         .flatMap(field -> Optional.ofNullable(field.getValidators())

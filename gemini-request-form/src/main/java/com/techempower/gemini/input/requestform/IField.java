@@ -2,7 +2,6 @@ package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.Input;
 import com.techempower.gemini.input.QueryValues;
-import com.techempower.gemini.input.Validation;
 import com.techempower.gemini.input.Values;
 import com.techempower.gemini.input.validator.Validator;
 
@@ -183,7 +182,8 @@ public interface IField<T>
 
   /**
    * @return validation specific to *only* this field. Can be used to determine
-   * if any validation errors originated from this specific field.
+   * if any validation errors originated from this specific field. Note: This
+   * must only be called after processing. This will return null otherwise.
    */
-  Validation validation();
+  Input input();
 }

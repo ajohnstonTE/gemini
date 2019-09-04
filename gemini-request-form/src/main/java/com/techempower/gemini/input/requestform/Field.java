@@ -18,15 +18,15 @@ import java.util.function.Function;
 public class Field<T>
     implements IField<T>
 {
-  private String                   name;
-  private Class<T>                 type;
-  private List<Validator>          customValidators;
-  private boolean                  required;
-  private Function<ValueAccess, T> valueAccess;
-  private T                        value;
-  private T                        defaultOnProcess;
-  private final IRequestForm       form;
-  private MutableValidation        validation;
+  private       String                   name;
+  private       Class<T>                 type;
+  private       List<Validator>          customValidators;
+  private       boolean                  required;
+  private       Function<ValueAccess, T> valueAccess;
+  private       T                        value;
+  private       T                        defaultOnProcess;
+  private final IRequestForm             form;
+  private       SyncedInput              input;
 
   public Field(IRequestForm form, String name, Class<T> type)
   {
@@ -36,6 +36,7 @@ public class Field<T>
     this.type = type;
     this.determineDefaultValueAccess();
     this.form().addField(this);
+    this.input = null;
   }
 
   protected IRequestForm form()
@@ -91,14 +92,15 @@ public class Field<T>
   }
 
   @Override
-  public Validation validation()
+  public Input input()
   {
-    if (validation == null)
-    {
-      return new BasicValidation();
-    }
-    throw new UnsupportedOperationException();
-    //return new WatchedMutableValidation();
+    return this.input;
+  }
+
+  protected Field syncOnInput(Input inputToSyncOn)
+  {
+    this.input = new SyncedInput(inputToSyncOn);
+    return this;
   }
 
   @Override
@@ -195,6 +197,8 @@ public class Field<T>
     return this;
   }
 
+  // TODO: For now it's fine here, but eventually move this to a strategy-type
+  //  class. It's logic that doesn't *really* belong in this class.
   @SuppressWarnings("unchecked")
   protected void determineDefaultValueAccess()
   {

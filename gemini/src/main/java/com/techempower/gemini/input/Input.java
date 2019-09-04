@@ -41,15 +41,18 @@ import com.techempower.js.legacy.*;
  * validators via an instance of ValidatorSet.
  */
 public class Input
-  implements MutableValidation
+    implements JavaScriptObject
 {
   //
   // Variables.
   //
 
-  private final Context                context;
-  private final Query                  query;
-  private final BasicMutableValidation internalValidation;
+  private final Context       context;
+  private final Query         query;
+  private int                 statusCode = 400;
+  private List<String>        errorMessages;
+  private Map<String, Object> erroredElements;
+  private Object              auxiliary;
 
   //
   // Methods.
@@ -62,7 +65,6 @@ public class Input
   {
     this.context = context;
     this.query = context.query();
-    this.internalValidation = new BasicMutableValidation();
   }
 
   /**
@@ -85,20 +87,18 @@ public class Input
    * Gets the list of error messages.
    */
   @JsonProperty("errors")
-  @Override
   public List<String> errors()
   {
-    return internalValidation.errors();
+    return errorMessages;
   }
 
   /**
    * Gets the map of elements in error.
    */
   @JsonProperty("elements")
-  @Override
   public Map<String, Object> erroredElements()
   {
-    return internalValidation.erroredElements();
+    return erroredElements;
   }
 
   /**
@@ -108,10 +108,14 @@ public class Input
    *        other type that can be serialized to JSON and rendered in a
    *        template.
    */
-  @Override
   public Input addError(final String errorMessage)
   {
-    internalValidation.addError(errorMessage);
+    if (errorMessages == null)
+    {
+      errorMessages = new ArrayList<>(10);
+    }
+
+    errorMessages.add(errorMessage);
 
     return this;
   }
@@ -123,12 +127,9 @@ public class Input
    *
    * @param errorMessage A message describing the validation error.
    */
-  @Override
   public Input addError(final String element, final String errorMessage)
   {
-    internalValidation.addError(element, errorMessage);
-
-    return this;
+    return addError(element, errorMessage, true);
   }
 
   /**
@@ -140,14 +141,42 @@ public class Input
    *        for some other reason (already present in this Result), should
    *        this new message be added?
    */
-  @Override
   public Input addError(
       final String element,
       final String errorMessage,
       final boolean addIfElementAlreadyPresent)
   {
-    internalValidation.addError(element, errorMessage,
-        addIfElementAlreadyPresent);
+    if (erroredElements == null)
+    {
+      erroredElements = new HashMap<>(10);
+    }
+
+    // Capture single errors per element as plain Strings, and promote
+    // multiple errors per element into Lists of Strings.
+    final Object contained = erroredElements.get(element);
+    if (contained == null)
+    {
+      erroredElements.put(element, errorMessage);
+    }
+    else if (  (contained instanceof String)
+        && (addIfElementAlreadyPresent)
+    )
+    {
+      final List<String> list = new ArrayList<>(10);
+      list.add((String)contained);
+      list.add(errorMessage);
+      erroredElements.put(element, list);
+    }
+    else if (  (contained instanceof List<?>)
+        && (addIfElementAlreadyPresent)
+    )
+    {
+      @SuppressWarnings("unchecked")
+      final List<String> list = (List<String>)contained;
+      list.add(errorMessage);
+    }
+
+    addError(errorMessage);
 
     return this;
   }
@@ -156,10 +185,9 @@ public class Input
    * Sets the HTTP status code to something specific.  The default is 400
    * ("bad request").
    */
-  @Override
   public Input setStatusCode(int statusCode)
   {
-    internalValidation.setStatusCode(statusCode);
+    this.statusCode = statusCode;
     return this;
   }
 
@@ -167,16 +195,22 @@ public class Input
    * Gets the HTTP status code.  The default is 400 ("bad request").
    */
   @JsonIgnore
-  @Override
   public int getStatusCode()
   {
-    return internalValidation.getStatusCode();
+    return this.statusCode;
+  }
+
+  /**
+   * Are there no errors?
+   */
+  public boolean passed()
+  {
+    return (errorMessages == null);
   }
 
   /**
    * Are there any errors?
    */
-  @Override
   public boolean failed()
   {
     return (!passed());
@@ -187,7 +221,7 @@ public class Input
   {
     return "Validation.Result ["
         + (passed() ? "Good; " : "Bad; ")
-        + CollectionHelper.toString(errors(), ";")
+        + CollectionHelper.toString(errorMessages, ";")
         + "]";
   }
 
@@ -195,20 +229,43 @@ public class Input
    * Return the auxiliary object reference.
    */
   @JsonProperty("aux")
-  @Override
   public Object getAuxiliary()
   {
-    return internalValidation.getAuxiliary();
+    return auxiliary;
   }
 
   /**
    * Set the auxiliary object reference.
    */
-  @Override
   public Input setAuxiliary(final Object auxiliary)
   {
-    internalValidation.setAuxiliary(auxiliary);
+    this.auxiliary = auxiliary;
 
     return this;
   }
+
+  private static final VisitorFactory<Input> VISITOR_FACTORY =
+      new VisitorFactory<Input>()
+      {
+        @Override
+        public Visitor visitor(Input result)
+        {
+          return Visitors.map(
+              "errors", result.errors(),
+              "elements", result.erroredElements(),
+              "aux", result.getAuxiliary()
+          );
+        }
+      };
+
+  /**
+   * Get a VisitorFactory for writing Validation Results to JavaScript.
+   */
+  @Override
+  @JsonIgnore
+  public VisitorFactory<Input> getJsVisitorFactory()
+  {
+    return VISITOR_FACTORY;
+  }
+
 }
