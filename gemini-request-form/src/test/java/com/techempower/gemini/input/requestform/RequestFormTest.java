@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Objects;
 
+import static com.techempower.gemini.ContextTestHelper.context;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RequestFormTest
@@ -130,7 +131,9 @@ public class RequestFormTest
 
   @ParameterizedTest
   @MethodSource("testBaseTypeParams")
-  public <T> void testBaseTypes(Class<T> fieldType, String inputValue, T expected)
+  public <T> void testBaseTypes(Class<T> fieldType,
+                                String inputValue,
+                                T expected)
   {
     {
       class SingleFieldForm extends RequestForm
@@ -138,7 +141,7 @@ public class RequestFormTest
         Field<T> field = new Field<>(this, "example", fieldType);
       }
       SingleFieldForm form = new SingleFieldForm();
-      assertTrue(form.process(ctx("example", inputValue)).passed());
+      assertTrue(form.process(context("example", inputValue)).passed());
       assertEquals(expected, form.field.getValue());
     }
   }
@@ -177,7 +180,9 @@ public class RequestFormTest
 
   @ParameterizedTest
   @MethodSource("testBaseArrayTypeParams")
-  public <T> void testBaseArrayTypes(Class<T> fieldType, String[] inputValues, T expected)
+  public <T> void testBaseArrayTypes(Class<T> fieldType,
+                                     String[] inputValues,
+                                     T expected)
   {
     {
       class SingleFieldForm extends RequestForm
@@ -185,7 +190,7 @@ public class RequestFormTest
         Field<T> field = new Field<>(this, "example", fieldType);
       }
       SingleFieldForm form = new SingleFieldForm();
-      assertTrue(form.process(ctx("example", inputValues)).passed());
+      assertTrue(form.process(context("example", inputValues)).passed());
       assertTrue(Objects.deepEquals(expected, form.field.getValue()));
     }
   }
@@ -202,21 +207,21 @@ public class RequestFormTest
       }
       {
         SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
-        assertTrue(form.process(ctx("example", "4")).failed());
+        assertTrue(form.process(context("example", "4")).failed());
       }
       {
         SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
-        assertTrue(form.process(ctx("example", "2")).passed());
+        assertTrue(form.process(context("example", "2")).passed());
         assertEquals((Long) 2L, form.field.getValue());
       }
       {
         SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
-        assertTrue(form.process(ctx("example", "0")).passed());
+        assertTrue(form.process(context("example", "0")).passed());
         assertEquals((Long) 0L, form.field.getValue());
       }
       {
         SingleLongNumberFieldForm form = new SingleLongNumberFieldForm();
-        assertTrue(form.process(ctx("example", "0.0")).failed());
+        assertTrue(form.process(context("example", "0.0")).failed());
       }
     }
     {
@@ -227,26 +232,26 @@ public class RequestFormTest
             .setMin(20f);
         {
           SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
-          assertTrue(form.process(ctx("example", "4")).passed());
+          assertTrue(form.process(context("example", "4")).passed());
           assertEquals((Float)4f, form.field.getValue());
         }
         {
           SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
-          assertTrue(form.process(ctx("example", "0.0")).passed());
+          assertTrue(form.process(context("example", "0.0")).passed());
           assertEquals((Float)0f, form.field.getValue());
         }
         {
           SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
-          assertTrue(form.process(ctx("example", "-0.1")).failed());
+          assertTrue(form.process(context("example", "-0.1")).failed());
         }
         {
           SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
-          assertTrue(form.process(ctx("example", "20")).passed());
+          assertTrue(form.process(context("example", "20")).passed());
           assertEquals((Float)20f, form.field.getValue());
         }
         {
           SingleFloatNumberFieldForm form = new SingleFloatNumberFieldForm();
-          assertTrue(form.process(ctx("example", "2er0")).failed());
+          assertTrue(form.process(context("example", "2er0")).failed());
         }
       }
     }
@@ -258,153 +263,28 @@ public class RequestFormTest
             .setMin(20d);
         {
           SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
-          assertTrue(form.process(ctx("example", "4")).passed());
+          assertTrue(form.process(context("example", "4")).passed());
           assertEquals((Double)4d, form.field.getValue());
         }
         {
           SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
-          assertTrue(form.process(ctx("example", "0.0")).passed());
+          assertTrue(form.process(context("example", "0.0")).passed());
           assertEquals((Double)0d, form.field.getValue());
         }
         {
           SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
-          assertTrue(form.process(ctx("example", "-0.1")).failed());
+          assertTrue(form.process(context("example", "-0.1")).failed());
         }
         {
           SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
-          assertTrue(form.process(ctx("example", "20")).passed());
+          assertTrue(form.process(context("example", "20")).passed());
           assertEquals((Double)20d, form.field.getValue());
         }
         {
           SingleDoubleNumberFieldForm form = new SingleDoubleNumberFieldForm();
-          assertTrue(form.process(ctx("example", "2er0")).failed());
+          assertTrue(form.process(context("example", "2er0")).failed());
         }
       }
     }
-  }
-
-  private Context ctx(String key, String value)
-  {
-    SimParameters parameters = new SimParameters();
-    if (value != null)
-    {
-      parameters.append(key, value);
-    }
-    return context(parameters);
-  }
-
-  private Context ctx(String key, String[] values)
-  {
-    SimParameters parameters = new SimParameters();
-    if (values != null)
-    {
-      for (String value : values)
-      {
-        if (value != null)
-        {
-          parameters.append(key, value);
-        }
-      }
-    }
-    return context(parameters);
-  }
-
-  private Context context(ISimParameters parameters)
-  {
-    GeminiApplication application = new GeminiApplication()
-    {
-      @Override
-      protected Dispatcher constructDispatcher()
-      {
-        return null;
-      }
-
-      @Override
-      protected ConnectorFactory constructConnectorFactory()
-      {
-        return null;
-      }
-
-      @Override
-      protected MustacheManager constructMustacheManager()
-      {
-        return null;
-      }
-
-      @Override
-      protected SessionManager constructSessionManager()
-      {
-        return null;
-      }
-
-      @Override
-      protected GeminiMonitor constructMonitor()
-      {
-        return null;
-      }
-
-      @Override
-      public Context getContext(Request request)
-      {
-        return null;
-      }
-
-      @Override
-      public ComponentLog getLog(String componentCode)
-      {
-        return new ComponentLog(getApplicationLog(), componentCode) {
-          @Override
-          public void log(String logString, int debugLevel)
-          {
-          }
-
-          @Override
-          public void log(String logString)
-          {
-          }
-
-          @Override
-          public void log(String debugString, int debugLevel, Throwable exception)
-          {
-          }
-
-          @Override
-          public void log(String debugString, Throwable exception)
-          {
-          }
-        };
-      }
-    };
-    Simulation simulation = new Simulation()
-    {
-      @Override
-      public GeminiApplication getApplication()
-      {
-        return application;
-      }
-
-      @Override
-      protected String getDocroot()
-      {
-        return "";
-      }
-
-      @Override
-      protected Class<? extends BasicUser> getUserClass()
-      {
-        return null;
-      }
-    };
-    SimClient simClient = new SimClient(1);
-    Request request = new GetSimRequest(simulation, "", parameters, simClient,
-        application);
-    return new Context(application, request)
-    {
-      @Override
-      public Attachments files()
-      {
-        return null;
-      }
-    };
   }
 }
