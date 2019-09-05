@@ -186,4 +186,11 @@ public interface IField<T>
    * must only be called after processing. This will return null otherwise.
    */
   Input input();
+
+  /**
+   * Used during validation to provide the semi-isolated input for the field
+   *
+   * @param inputToSyncOn - the input to sync against
+   */
+  IField<T> syncOnInput(Input inputToSyncOn);
 }

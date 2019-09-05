@@ -1,26 +1,14 @@
 package com.techempower.gemini.input.requestform;
 
-import com.techempower.data.ConnectorFactory;
-import com.techempower.gemini.*;
-import com.techempower.gemini.context.Attachments;
 import com.techempower.gemini.input.Input;
 import com.techempower.gemini.input.requestform.validator.TryCatchValidator;
-import com.techempower.gemini.monitor.GeminiMonitor;
-import com.techempower.gemini.mustache.MustacheManager;
-import com.techempower.gemini.pyxis.BasicUser;
-import com.techempower.gemini.session.SessionManager;
-import com.techempower.gemini.simulation.GetSimRequest;
-import com.techempower.gemini.simulation.ISimParameters;
-import com.techempower.gemini.simulation.SimClient;
 import com.techempower.gemini.simulation.SimParameters;
-import com.techempower.log.ComponentLog;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 import static com.techempower.gemini.ContextTestHelper.context;
@@ -309,14 +297,12 @@ public class RequestFormTest
       assertEquals(LocalDate.of(2019, 1, 3), form.date.getValue());
     }
     {
-      assertDoesNotThrow(() -> {
-        TestForm form = new TestForm();
-        Input input = form.process(context(new SimParameters()
-            .append("date", "2019-01-003")));
-        assertTrue(input.failed());
-        assertEquals(input.errors().size(), 1);
-        assertEquals(input.errors().get(0), "`date` is not a valid date");
-      });
+      TestForm form = new TestForm();
+      Input input = form.process(context(new SimParameters()
+          .append("date", "2019-01-003")));
+      assertTrue(input.failed());
+      assertEquals(input.errors().size(), 1);
+      assertEquals(input.errors().get(0), "`date` is not a valid date");
     }
   }
 }

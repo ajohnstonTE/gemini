@@ -47,9 +47,7 @@ public class Field<T>
   public <V> DerivedField<T, V> derive(Class<V> type,
                                        Function<T, V> derivation)
   {
-    DerivedField<T, V> field = new DerivedField<>(this, type, derivation);
-    this.form().addField(field);
-    return field;
+    return new DerivedField<>(this, type, derivation);
   }
 
   @Override
@@ -97,7 +95,8 @@ public class Field<T>
     return this.input;
   }
 
-  protected Field syncOnInput(Input inputToSyncOn)
+  @Override
+  public Field<T> syncOnInput(Input inputToSyncOn)
   {
     this.input = new SyncedInput(inputToSyncOn);
     return this;

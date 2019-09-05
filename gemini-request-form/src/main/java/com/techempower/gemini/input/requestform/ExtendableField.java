@@ -38,6 +38,13 @@ public abstract class ExtendableField<T, S extends ExtendableField<T, S>>
   }
 
   @Override
+  public S syncOnInput(Input inputToSyncOn)
+  {
+    super.syncOnInput(inputToSyncOn);
+    return self();
+  }
+
+  @Override
   public S setRequired(boolean required)
   {
     super.setRequired(required);

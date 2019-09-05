@@ -146,6 +146,17 @@ public class Input
       final String errorMessage,
       final boolean addIfElementAlreadyPresent)
   {
+    addErrorElement(element, errorMessage, addIfElementAlreadyPresent);
+
+    addError(errorMessage);
+
+    return this;
+  }
+
+  protected void addErrorElement(final String element,
+                                 final String errorMessage,
+                                 final boolean addIfElementAlreadyPresent)
+  {
     if (erroredElements == null)
     {
       erroredElements = new HashMap<>(10);
@@ -175,10 +186,6 @@ public class Input
       final List<String> list = (List<String>)contained;
       list.add(errorMessage);
     }
-
-    addError(errorMessage);
-
-    return this;
   }
 
   /**

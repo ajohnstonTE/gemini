@@ -55,12 +55,14 @@ public class RequestForm
     return customValidators;
   }
 
-  protected ValidatorSet getValidatorSet()
+/*  protected void validate()
   {
+
     if (true) throw new UnsupportedOperationException(
         "Fields need to be told validation is starting, then be given the" +
             " input being processed. This validator set method can pretty " +
             "much go away. Still, double check that it isn't used in TMPT.");
+
     Stream<Validator> fieldValidators = this.getFields()
         .stream()
         .flatMap(field -> Optional.ofNullable(field.getValidators())
@@ -68,24 +70,65 @@ public class RequestForm
             .orElseGet(Stream::of))
         .filter(Objects::nonNull);
     Stream<Validator> customValidators = this.customValidators().stream();
-    return new ValidatorSet(Stream.concat(fieldValidators, customValidators)
+    *//*return*//* new ValidatorSet(Stream.concat(fieldValidators, customValidators)
         .toArray(Validator[]::new));
-  }
+  }*/
 
   @Override
   public Input process(Context context)
   {
-    Input input = getValidatorSet().process(context);
-    setValuesFromQuery(context.query());
-    return input;
+    // TODO: Eventually, all things (including fields) should be
+    //  validators/validatable so that everything can be processed in the same
+    //  order it was added to the form.
+    // TODO: Rename "custom" validators to field/form validators.
+    ValidatorSet validatorSet = new ValidatorSet(
+        customValidators().toArray(new Validator[0]));
+    Input formInput = validatorSet.process(context);
+    getFields()
+        .forEach(field -> {
+          // TODO: Account for the fact that some derived fields might
+          //  *somehow* be added before their source fields (probably not
+          //  possible).
+          // TODO: Eventually, find a way to not do this by type-checking each
+          if (field instanceof DerivedField)
+          {
+            // TODO: The way this is written, a derived field that is dependent
+            //  on another derived field will be processed if the root source
+            //  field did not pass validation because the middle derived field
+            //  will not have been evaluated. Address this.
+            DerivedField derivedField = (DerivedField)field;
+            if (derivedField.getSource().input().passed())
+            {
+              // Note: It doesn't really need query here, just the validation.
+              field.syncOnInput(formInput);
+              field.getValidators()
+                  .forEach(validator -> validator.process(field.input()));
+              field.setFrom(new QueryValues(field.input().values()));
+            }
+          }
+          else
+          {
+            field.syncOnInput(formInput);
+            field.getValidators()
+                .forEach(validator -> validator.process(field.input()));
+            field.setFrom(new QueryValues(field.input().values()));
+          }
+        });
+    //setValuesFromQuery(context.query());
+    return formInput;
   }
 
   @Override
   public void setValuesFromQuery(Query query)
   {
-    setValuesFrom(new QueryValues(query));
+    throw new UnsupportedOperationException("Soon to be removed, most likely");
+    //setValuesFrom(new QueryValues(query));
   }
 
+  // TODO: Add documentation indicating this only does the base fields, not the
+  //  derived. Also, make it only affect the base fields. I think. Otherwise,
+  //  there would be no way to prevent exceptions (though exceptions *might* be
+  //  acceptable to silence here. Maybe. Probably not).
   @Override
   public void setValuesFromMap(Map<String, List<String>> query)
   {

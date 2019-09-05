@@ -3,10 +3,6 @@ package com.techempower.gemini.input;
 import com.techempower.gemini.context.CopiedQuery;
 import com.techempower.gemini.context.Query;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 public class SyncedInput
     extends Input
 {
@@ -42,7 +38,8 @@ public class SyncedInput
                               boolean addIfElementAlreadyPresent)
   {
     super.addError(element, errorMessage, addIfElementAlreadyPresent);
-    syncedInput.addError(element, errorMessage, addIfElementAlreadyPresent);
+    syncedInput.addErrorElement(element, errorMessage,
+        addIfElementAlreadyPresent);
 
     return this;
   }
