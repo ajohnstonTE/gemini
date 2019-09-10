@@ -1,6 +1,7 @@
 package com.techempower.gemini.input.requestform;
 
 import com.techempower.gemini.input.Input;
+import com.techempower.gemini.input.processor.Uppercase;
 import com.techempower.gemini.input.requestform.validator.TryCatchValidator;
 import com.techempower.gemini.simulation.SimParameters;
 
@@ -303,6 +304,35 @@ public class RequestFormTest
       assertTrue(input.failed());
       assertEquals(input.errors().size(), 1);
       assertEquals(input.errors().get(0), "`date` is not a valid date");
+    }
+  }
+
+  @Test
+  void testPerFieldValidation()
+  {
+    class TestForm extends RequestForm
+    {
+      Field<String> rawDate = new BaseField<>(this, "date", String.class)
+          .addFieldValidator(new TryCatchValidator<>(LocalDate::parse, "`%s` is not a valid date"));
+      Field<String> sortA = new BaseField<>(this, "sort", String.class)
+          .addValidator(new Uppercase("sort"));
+      Field<String> sortB = new BaseField<>(this, "sort", String.class);
+    }
+    {
+      TestForm form = new TestForm();
+      Input input = form.process(context(new SimParameters()
+          .append("date", "2019-01-003")));
+      assertTrue(input.failed());
+      assertTrue(form.rawDate.input().failed());
+      assertTrue(form.sortA.input().passed());
+      assertTrue(form.sortB.input().passed());
+    }
+    {
+      TestForm form = new TestForm();
+      Input input = form.process(context(new SimParameters()
+          .append("sort", "asc")));
+      assertEquals("ASC", form.sortA.getValue());
+      assertEquals("asc", form.sortB.getValue());
     }
   }
 }
