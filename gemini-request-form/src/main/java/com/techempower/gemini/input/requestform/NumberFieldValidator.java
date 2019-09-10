@@ -9,6 +9,9 @@ import java.util.function.Function;
 /**
  * Validates that the user provided string is a double within the provided
  * minimum and maximum.
+ *
+ * TODO: I think these should be added automatically similarly to the default
+ *   value access functions.
  */
 public abstract class NumberFieldValidator<T>
     extends FieldValidator<T>

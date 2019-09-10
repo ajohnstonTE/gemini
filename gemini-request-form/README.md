@@ -28,6 +28,7 @@ class BasicExampleHandler extends MethodUriHandler<Context>
     long entityId = input.values().getLong("entity-id");
     // ...rest of the method...
   }
+}
 ```
 
 And again, using request forms
@@ -37,7 +38,7 @@ class BasicExampleHandler extends MethodUriHandler<Context>
 {
   class ExampleForm extends RequestForm
   {
-    Field<Long> entityId = new Field<>(this, "entity-id", Long.class)
+    Field<Long> entityId = new BaseField<>(this, "entity-id", Long.class)
       .setRequired(true)
       .addValidator(NumberFieldValidator.requireLong());
   }
@@ -71,7 +72,7 @@ class PreprocessingHandler extends MethodUriHandler<Context>
 {
   class ExampleForm extends RequestForm
   {
-    Field<Long> entityId = new Field<>(this, "entity-id", Long.class)
+    Field<Long> entityId = new BaseField<>(this, "entity-id", Long.class)
       .setRequired(true)
       .addValidator(NumberFieldValidator.requireLong());
   }
@@ -98,27 +99,16 @@ class PreprocessingHandler extends MethodUriHandler<Context>
 {
   class FirstExampleForm extends RequestForm
   {
-    Field<Long> entityId = new Field<>(this, "entity-id", Long.class)
+    Field<Long> entityId = new BaseField<>(this, "entity-id", Long.class)
       .setRequired(true)
       .addValidator(NumberFieldValidator.requireLong());
   }
 
   class SecondExampleForm extends RequestForm
   {
-    Field<LocalDate> date = new Field<>(this, "date", LocalDate.class)
-      .setValueAccess(values -> values.has() 
-          ? LocalDate.parse(values.getString())
-          : null)
-      .addValidator(input -> {
-        try
-        {
-          this.date.getValueFrom(input);
-        }
-        catch(Exception e)
-        {
-          input.addError(this.date.getName(), "`date` is not a valid date.")
-        }
-      });
+    Field<LocalDate> date = new BaseField<>(this, "date", String.class)
+      .addFieldValidator(new TryCatchValidator<>(LocalDate::parse, "`%s` is not a valid date"))
+      .derive(LocalDate::parse);
   }
   
   @Path("request-form")
@@ -148,10 +138,10 @@ class DeconstructingJsonHandler extends MethodUriHandler<Context>
 {
   class ExampleForm extends RequestForm
   {
-    Field<String> someText = new Field<>(this, "some-text", String.class);
+    Field<String> someText = new BaseField<>(this, "some-text", String.class);
     ObjectField actionData = new ObjectField(this, "action-data") {
-      Field<long[]> entityIds = new Field<>(objectField, "entity-ids", long[].class);
-      Field<Boolean> delete = new Field<>(objectField, "delete", Boolean.class);
+      Field<long[]> entityIds = new BaseField<>(objectField, "entity-ids", long[].class);
+      Field<Boolean> delete = new BaseField<>(objectField, "delete", Boolean.class);
     };
   }
 
