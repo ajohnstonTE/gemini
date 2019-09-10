@@ -9,7 +9,7 @@ import java.util.List;
  * allowable. If using the forms JSP tags, these are translated into the min/max attributes.
  */
 public class NumberField<T>
-    extends ExtendableField<T, NumberField<T>>
+    extends ExtendableBaseField<T, NumberField<T>>
 {
   private T min;
   private T max;

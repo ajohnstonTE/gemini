@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  * @author ajohnston
  */
 public class SelectField<T>
-    extends ExtendableField<T, SelectField<T>>
+    extends ExtendableBaseField<T, SelectField<T>>
 {
   private List<Option> options;
   private List<String> selectedValues;

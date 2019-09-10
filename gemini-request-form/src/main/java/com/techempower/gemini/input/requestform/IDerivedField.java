@@ -1,5 +1,6 @@
 package com.techempower.gemini.input.requestform;
 
-public class IDerivedField
+public interface IDerivedField<R, T>
+  extends IField<T>
 {
 }

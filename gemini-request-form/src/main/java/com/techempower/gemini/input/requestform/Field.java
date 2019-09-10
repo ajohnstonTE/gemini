@@ -1,6 +1,7 @@
 package com.techempower.gemini.input.requestform;
 
-import com.techempower.gemini.input.*;
+import com.techempower.gemini.input.Input;
+import com.techempower.gemini.input.SyncedInput;
 import com.techempower.gemini.input.validator.Validator;
 
 import java.util.ArrayList;
@@ -15,39 +16,27 @@ import java.util.function.Function;
  * rendering included. Intended to be used in conjunction with the JSP forms
  * tags, though most likely compatible with any/all templating languages.
  */
-public class Field<T>
+public abstract class Field<T>
     implements IField<T>
 {
-  private       String                   name;
-  private       Class<T>                 type;
-  private       List<Validator>          customValidators;
-  private       boolean                  required;
-  private       Function<ValueAccess, T> valueAccess;
-  private       T                        value;
-  private       T                        defaultOnProcess;
-  private final IRequestForm             form;
-  private       SyncedInput              input;
+  private List<DerivedField<T, ?>> derivedFields;
+  private List<Validator>          customValidators;
+  private boolean                  required;
+  private T                        value;
+  private T                        defaultOnProcess;
+  private SyncedInput              input;
 
-  public Field(IRequestForm form, String name, Class<T> type)
+  protected Field()
   {
-    this.form = form;
-    this.name = name;
-    this.customValidators = new ArrayList<>();
-    this.type = type;
-    this.determineDefaultValueAccess();
-    this.form().addField(this);
-    this.input = null;
+    derivedFields = new ArrayList<>();
+    customValidators = new ArrayList<>();
   }
 
-  protected IRequestForm form()
+  public <V> DerivedField<T, V> derive(Function<T, V> derivation)
   {
-    return form;
-  }
-
-  public <V> DerivedField<T, V> derive(Class<V> type,
-                                       Function<T, V> derivation)
-  {
-    return new DerivedField<>(this, type, derivation);
+    DerivedField<T, V> derivedField = new DerivedField<>(this, derivation);
+    getDerivedFields().add(derivedField);
+    return derivedField;
   }
 
   @Override
@@ -55,6 +44,11 @@ public class Field<T>
   {
     getCustomValidators().add(validator);
     return this;
+  }
+
+  protected List<DerivedField<T, ?>> getDerivedFields()
+  {
+    return derivedFields;
   }
 
   @Override
@@ -77,29 +71,27 @@ public class Field<T>
     });
   }
 
-  @Override
-  public String getName()
+  /**
+   * @return any/all custom validators added to the field externally
+   */
+  protected List<Validator> getCustomValidators()
   {
-    return name;
+    return customValidators;
   }
 
-  @Override
-  public Class<T> getType()
+  /**
+   * Processes any/all fields derived from this one iff this field passed
+   * validation. The input provided to the derived fields is the one processed
+   * by this one.
+   *
+   * @param input - the input to process
+   */
+  protected void processDerivedIfValid(Input input)
   {
-    return type;
-  }
-
-  @Override
-  public Input input()
-  {
-    return this.input;
-  }
-
-  @Override
-  public Field<T> syncOnInput(Input inputToSyncOn)
-  {
-    this.input = new SyncedInput(inputToSyncOn);
-    return this;
+    if (input.passed())
+    {
+      getDerivedFields().forEach(derivedField -> derivedField.process(input));
+    }
   }
 
   @Override
@@ -128,13 +120,6 @@ public class Field<T>
   }
 
   @Override
-  public Field<T> setValueAccess(Function<ValueAccess, T> valueAccess)
-  {
-    this.valueAccess = valueAccess;
-    return this;
-  }
-
-  @Override
   public Field<T> setDefaultOnProcess(T defaultOnProcess)
   {
     this.defaultOnProcess = defaultOnProcess;
@@ -145,6 +130,13 @@ public class Field<T>
   public T getDefaultOnProcess()
   {
     return defaultOnProcess;
+  }
+
+  @Override
+  public Field<T> setValueToDefault()
+  {
+    IField.super.setValueToDefault();
+    return this;
   }
 
   @Override
@@ -161,111 +153,21 @@ public class Field<T>
   }
 
   @Override
-  public Function<ValueAccess, T> getValueAccess()
+  public Input input()
   {
-    return valueAccess;
-  }
-
-  /**
-   * @return any/all custom validators added to the field externally
-   */
-  protected List<Validator> getCustomValidators()
-  {
-    return customValidators;
+    return this.input;
   }
 
   @Override
-  public Field<T> setValueAccess(Function<ValueAccess, T> valueAccess,
-                                 T defaultValue)
+  public void process(Input input)
   {
-    IField.super.setValueAccess(valueAccess, defaultValue);
-    return this;
-  }
-
-  @Override
-  public Field<T> setValueToDefault()
-  {
-    IField.super.setValueToDefault();
-    return this;
-  }
-
-  @Override
-  public Field<T> setFrom(Values values)
-  {
-    IField.super.setFrom(values);
-    return this;
-  }
-
-  // TODO: For now it's fine here, but eventually move this to a strategy-type
-  //  class. It's logic that doesn't *really* belong in this class.
-  @SuppressWarnings("unchecked")
-  protected void determineDefaultValueAccess()
-  {
-    Class<T> type = getType();
-    if (Long.class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getLong());
-    }
-    else if (Integer.class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getInt());
-    }
-    else if (Short.class.equals(type))
-    {
-      setValueAccess(values -> {
-        Integer value = values.getInt();
-        if (value != null)
-        {
-          return (T)(Short)value.shortValue();
-        }
-        return null;
-      });
-    }
-    else if (Byte.class.equals(type))
-    {
-      setValueAccess(values -> {
-        Integer value = values.getInt();
-        if (value != null)
-        {
-          return (T)(Byte)value.byteValue();
-        }
-        return null;
-      });
-    }
-    else if (Double.class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getDouble());
-    }
-    else if (Float.class.equals(type))
-    {
-      setValueAccess(values -> {
-        Double value = values.getDouble();
-        if (value != null)
-        {
-          return (T)(Float)value.floatValue();
-        }
-        return null;
-      });
-    }
-    else if (String.class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getString());
-    }
-    else if (Boolean.class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getBooleanLenient());
-    }
-    else if (String[].class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getStrings());
-    }
-    else if (int[].class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getInts());
-    }
-    else if (long[].class.equals(type))
-    {
-      setValueAccess(values -> (T)values.getLongs());
-    }
+    // Note: It doesn't really need query here, just the validation.
+    // TODO: I don't know what I was talking about in the above comment.
+    SyncedInput syncedInput = new SyncedInput(input);
+    // TODO: This should eventually just be Validation, not the whole Input.
+    this.input = syncedInput;
+    getValidators().forEach(validator -> validator.process(syncedInput));
+    setValue(getValueFrom(syncedInput));
+    processDerivedIfValid(syncedInput);
   }
 }

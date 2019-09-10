@@ -12,7 +12,7 @@ import java.util.List;
  * @author ajohnston
  */
 public class TextField<T>
-    extends ExtendableField<T, TextField<T>>
+    extends ExtendableBaseField<T, TextField<T>>
 {
   private Integer minLength;
   private Integer maxLength;

@@ -18,7 +18,7 @@ public class RequestFormTest
 {
   static class DeclaredRequestFormSubclass extends RequestForm
   {
-    public Field<String> field = new Field<>(this, "foo", String.class)
+    public Field<String> field = new BaseField<>(this, "foo", String.class)
         .setRequired(true)
         .setValueAccess(ValueAccess::getString, "dog");
   }
@@ -130,7 +130,7 @@ public class RequestFormTest
     {
       class SingleFieldForm extends RequestForm
       {
-        Field<T> field = new Field<>(this, "example", fieldType);
+        Field<T> field = new BaseField<>(this, "example", fieldType);
       }
       SingleFieldForm form = new SingleFieldForm();
       assertTrue(form.process(context("example", inputValue)).passed());
@@ -179,7 +179,7 @@ public class RequestFormTest
     {
       class SingleFieldForm extends RequestForm
       {
-        Field<T> field = new Field<>(this, "example", fieldType);
+        Field<T> field = new BaseField<>(this, "example", fieldType);
       }
       SingleFieldForm form = new SingleFieldForm();
       assertTrue(form.process(context("example", inputValues)).passed());
@@ -285,9 +285,9 @@ public class RequestFormTest
   {
     class TestForm extends RequestForm
     {
-      Field<String> rawDate = new Field<>(this, "date", String.class)
+      Field<String> rawDate = new BaseField<>(this, "date", String.class)
           .addFieldValidator(new TryCatchValidator<>(LocalDate::parse, "`%s` is not a valid date"));
-      Field<LocalDate> date = rawDate.derive(LocalDate.class, LocalDate::parse);
+      Field<LocalDate> date = rawDate.derive(LocalDate::parse);
     }
     {
       TestForm form = new TestForm();

@@ -99,19 +99,12 @@ public class RequestForm
             DerivedField derivedField = (DerivedField)field;
             if (derivedField.getSource().input().passed())
             {
-              // Note: It doesn't really need query here, just the validation.
-              field.syncOnInput(formInput);
-              field.getValidators()
-                  .forEach(validator -> validator.process(field.input()));
-              field.setFrom(new QueryValues(field.input().values()));
+              field.process(formInput);
             }
           }
           else
           {
-            field.syncOnInput(formInput);
-            field.getValidators()
-                .forEach(validator -> validator.process(field.input()));
-            field.setFrom(new QueryValues(field.input().values()));
+            field.process(formInput);
           }
         });
     //setValuesFromQuery(context.query());
@@ -137,6 +130,10 @@ public class RequestForm
 
   protected void setValuesFrom(Values values)
   {
-    getFields().forEach(field -> field.setFrom(values));
+    getFields()
+        .stream()
+        .filter(IBaseField.class::isInstance)
+        .map(IBaseField.class::cast)
+        .forEachOrdered(field -> field.setFrom(values));
   }
 }
