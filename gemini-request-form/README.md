@@ -125,7 +125,7 @@ class PreprocessingHandler extends MethodUriHandler<Context>
 
 Same as before, but both forms get pre-processed. With the above syntax, 
 Gemini gains the straight-to-parameters syntax of other modern libraries, while
-keeping the concept of re-useable validation constraints.
+keeping the concept of re-usable validation constraints.
 
 
 ### Very Distant Future Features
@@ -136,13 +136,17 @@ and validating nested JSON objects will be added. Example:
 ```java
 class DeconstructingJsonHandler extends MethodUriHandler<Context>
 {
+  /* NestedField would implement both IRequestForm and IField */
+  class ActionData extends NestedField 
+  {
+    Field<long[]> entityIds = new BaseField<>(this, "entity-ids", long[].class);
+    Field<Boolean> delete = new BaseField<>(this, "delete", Boolean.class);
+  }
+
   class ExampleForm extends RequestForm
   {
     Field<String> someText = new BaseField<>(this, "some-text", String.class);
-    ObjectField actionData = new ObjectField(this, "action-data") {
-      Field<long[]> entityIds = new BaseField<>(objectField, "entity-ids", long[].class);
-      Field<Boolean> delete = new BaseField<>(objectField, "delete", Boolean.class);
-    };
+    ActionData actionData = new ActionData(this, "action-data");
   }
 
   @Path("request-form")
@@ -168,6 +172,16 @@ The above would \*ideally\* be capable of deconstructing JSON that looked like:
 }
 ```
 
-As it's written above, it wouldn't actually compile because 
-`form.actionData.entityIds` and `form.actionData.delete` wouldn't be 
-resolvable. But that's the general idea, at least.
+That's the general idea, at least.
+
+Less important features on the horizon include things like the processing of header values in fields, and the 
+abstraction of field validation such that something like `LowercaseFieldValidator` could be applied to both a 
+`HeaderField` and a normal query-based `Field` without otherwise needing to know where the values are coming from. 
+
+Also, a move away from the standard query-based validators is being considered, in order to allow this to happen. 
+On top of that, separating from the standard validation system will allow for general processing to be more 
+abstractly controlled, which will be helpful when deserializing JSON or grouping array elements. Technically this
+is all possible with the normal validation system, but by forcing all validation through a more general Input class,
+the values provided can be redirected more easily and without it seeming like a hack.
+
+Examples for that and a checklist for an "official" alpha release will come later.
