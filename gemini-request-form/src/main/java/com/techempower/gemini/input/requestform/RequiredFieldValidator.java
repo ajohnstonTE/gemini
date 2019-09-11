@@ -7,21 +7,14 @@ import com.techempower.helper.StringHelper;
  * Validates that the expected user-provided value has, in fact, been
  * provided.
  */
-public class RequiredFieldValidator
-    extends FieldValidator
+public class RequiredFieldValidator<T>
+    extends FieldValidator<T>
 {
   /**
    * Constructor.
    */
   public RequiredFieldValidator()
   {
-  }
-
-  @Override
-  protected FieldValidator setField(IField field)
-  {
-    super.setField(field);
-    return this;
   }
 
   @Override

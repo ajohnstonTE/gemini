@@ -9,7 +9,6 @@ import java.util.List;
  * A field that supports text input. Provides convenience methods for specifying the min/max lengths values allowable.
  * If using the forms JSP tags, these are translated into the minlength/maxlength attributes.
  *
- * @author ajohnston
  */
 public class TextField<T>
     extends ExtendableBaseField<T, TextField<T>>

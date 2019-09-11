@@ -1,12 +1,9 @@
 package com.techempower.gemini.input;
 
 import com.techempower.gemini.context.Query;
-import com.techempower.gemini.input.Input;
 
 /**
  * An implementation of the {@link Values} class using {@link Query}.
- *
- * @author ajohnston
  */
 public class QueryValues
     extends Values

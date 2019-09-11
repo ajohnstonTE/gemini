@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 
 /**
  * Provides utility methods for request forms.
- *
- * @author ajohnston
  */
 public class RequestFormHelper
 {

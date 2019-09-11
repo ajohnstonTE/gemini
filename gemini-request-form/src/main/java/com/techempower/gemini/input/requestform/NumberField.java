@@ -46,15 +46,13 @@ public class NumberField<T>
   {
     List<Validator> validators = super.getStandardValidators();
     validators.add(getNumberValidator()
-        .setField(this)
-        .asValidator());
+        .asValidator(this));
     T min = getMin();
     T max = getMax();
     if (min != null || max != null)
     {
       validators.add(getRangeValidator()
-          .setField(this)
-          .asValidator());
+          .asValidator(this));
     }
     return validators;
   }

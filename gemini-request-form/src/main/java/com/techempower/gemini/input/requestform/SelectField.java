@@ -13,8 +13,6 @@ import java.util.stream.Stream;
  * A field that accepts lists of values. Provides convenience methods for specifying these options. If using the forms
  * JSP tags, this is best rendered as a select. Adds validators to ensure the selected values are all also added as
  * options.
- *
- * @author ajohnston
  */
 public class SelectField<T>
     extends ExtendableBaseField<T, SelectField<T>>
@@ -133,15 +131,14 @@ public class SelectField<T>
         }
       }
     });
-    validators.add(new SetFieldValidator<T>((Object[]) allOptions.toArray(String[]::new))
-        .setField(this)
-        .asValidator());
+    validators.add(new SetFieldValidator<T>(allOptions.toArray(Object[]::new))
+        .asValidator(this));
     return validators;
   }
   
   public static class Option
   {
-    private SelectField<?> select;
+    private SelectField<?>          select;
     private String                  value;
     private String                  label;
     private HashMap<Object, Object> data;

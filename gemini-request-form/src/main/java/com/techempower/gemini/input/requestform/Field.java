@@ -6,7 +6,6 @@ import com.techempower.gemini.input.validator.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -52,23 +51,10 @@ public abstract class Field<T>
   }
 
   @Override
-  public Field<T> addFieldValidator(FieldValidator<T> fieldValidator)
+  public Field<T> addFieldValidator(IFieldValidator<T> fieldValidator)
   {
-    addValidator(fieldValidator.setField(this).asValidator());
+    addValidator(input -> fieldValidator.process(this, input));
     return this;
-  }
-
-  // Temporary implementation while I find a better way of doing this. Ideally shouldn't require two methods.
-  public Field<T> addFieldValidator(BiConsumer<IField<T>, Input> fieldValidator)
-  {
-    return addFieldValidator(new FieldValidator<T>()
-    {
-      @Override
-      protected void process(Input input)
-      {
-        fieldValidator.accept(getField(), input);
-      }
-    });
   }
 
   /**

@@ -9,8 +9,6 @@ import java.util.Map;
 
 /**
  * An implementation of the {@link Values} class using a {@link Map}.
- *
- * @author ajohnston
  */
 public class MapValues
     extends Values

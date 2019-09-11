@@ -10,8 +10,6 @@ import java.util.Map;
 
 /**
  * A collection of form fields and validators.
- *
- * @author ajohnston
  */
 public interface IRequestForm
 {

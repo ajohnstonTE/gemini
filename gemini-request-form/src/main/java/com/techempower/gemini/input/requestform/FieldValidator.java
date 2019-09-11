@@ -9,9 +9,12 @@ import com.techempower.gemini.input.validator.Validator;
  * field it is added to should provide a reference to itself, then convert it
  * to a validator. This is for the purpose of chain calls.
  *
- * @author ajohnston
+ * TODO: Add a method like `andThen(FieldValidator)` which would cause the
+ *  validator to add the validator to its own set of follow up validators,
+ *  which it would only process if it passed validation itself.
  */
 public abstract class FieldValidator<T>
+  implements IFieldValidator<T>
 {
   //
   // Variables.
@@ -27,15 +30,11 @@ public abstract class FieldValidator<T>
   }
 
   /**
-   * Should be called by the field when adding it. This is to allow field
-   * validators to be added during definition chains.
-   *
    * @param field - the field to associate with
    */
-  protected FieldValidator<T> setField(IField<T> field)
+  private void setField(IField<T> field)
   {
     this.field = field;
-    return this;
   }
   
   protected IField<T> getField()
@@ -48,9 +47,9 @@ public abstract class FieldValidator<T>
     return getField().getValueFrom(input);
   }
 
-  protected Validator asValidator()
+  protected Validator asValidator(IField<T> field)
   {
-    return this::process;
+    return input -> process(field, input);
   }
 
   /**
@@ -58,6 +57,13 @@ public abstract class FieldValidator<T>
    * validation error; a non-null String message otherwise.
    */
   protected abstract void process(final Input input);
+
+  @Override
+  public void process(IField<T> field, Input input)
+  {
+    setField(field);
+    process(input);
+  }
 
   /**
    * Gets the Element's name.

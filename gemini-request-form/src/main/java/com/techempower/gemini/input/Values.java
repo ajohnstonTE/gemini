@@ -4,8 +4,6 @@ import com.techempower.gemini.context.Query;
 
 /**
  * An abstraction/replacement of {@link Query} that allows for anything to serve as the base for the Query-like map.
- *
- * @author ajohnston
  */
 public abstract class Values
 {

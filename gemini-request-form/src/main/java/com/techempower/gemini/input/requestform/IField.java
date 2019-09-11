@@ -24,6 +24,18 @@ public interface IField<T>
    *  validators. Not that it's super necessary though. Just an idea. I also
    *  don't want to break compatibility with the existing input stuff, so idk.
    *
+   * TODO (follow-up): Sticking with the Input/Validator system may be
+   *  limiting. Specifically, the input system is designed around the query
+   *  params/form input, and around named element validation. But in the future
+   *  this will support header fields, JSON, and whatever else. Things that
+   *  100% won't be in the query. This kind of thing is covered by Values,
+   *  though Values is currently just a way of accessing that data. A
+   *  replacement for Input (like FieldInput) should be created that functions
+   *  purely based on the generic Values data, while also being capable of
+   *  directly accessing the field's getValue method if so desired (it would be
+   *  more convenient when writing on-the-fly validators, currently this is
+   *  done using Field#getValueFrom(Input)).
+   *
    * Adds a validator to the field.
    *
    * @param validator the validator to add
@@ -35,7 +47,7 @@ public interface IField<T>
    *
    * @param fieldValidator the field validator to add
    */
-  IField<T> addFieldValidator(FieldValidator<T> fieldValidator);
+  IField<T> addFieldValidator(IFieldValidator<T> fieldValidator);
 
   /**
    * TODO: Decide if isRequired/setRequired should be a base field thing.
@@ -74,9 +86,8 @@ public interface IField<T>
     List<Validator> validators = new ArrayList<>();
     if (isRequired())
     {
-      validators.add(new RequiredFieldValidator()
-          .setField(this)
-          .asValidator());
+      validators.add(new RequiredFieldValidator<T>()
+          .asValidator(this));
     }
     return validators;
   }

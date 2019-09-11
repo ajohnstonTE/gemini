@@ -9,8 +9,6 @@ import java.util.*;
 /**
  * A representation of input, composed of the user-provided values and any validation errors raised by validators. This
  * variation of Input is a combination of multiple inputs, combining any errors into a single input.
- *
- * @author ajohnston
  */
 public class ComboInput
     extends Input

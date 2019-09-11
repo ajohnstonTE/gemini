@@ -23,14 +23,7 @@ public abstract class ExtendableBaseField<T, S extends ExtendableBaseField<T, S>
   }
 
   @Override
-  public S addFieldValidator(FieldValidator<T> fieldValidator)
-  {
-    super.addFieldValidator(fieldValidator);
-    return self();
-  }
-
-  @Override
-  public S addFieldValidator(BiConsumer<IField<T>, Input> fieldValidator)
+  public S addFieldValidator(IFieldValidator<T> fieldValidator)
   {
     super.addFieldValidator(fieldValidator);
     return self();
