@@ -3,18 +3,50 @@ package com.techempower.gemini.input;
 import com.techempower.gemini.context.CopiedQuery;
 import com.techempower.gemini.context.Query;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 public class SyncedInput
     extends Input
 {
   private final Input       syncedInput;
   private final CopiedQuery query;
 
-  public SyncedInput(Input syncedInput)
+  public SyncedInput(Input syncedInput, boolean inheritErrors)
   {
     super(syncedInput.context());
     this.syncedInput = syncedInput;
     this.query = new CopiedQuery(syncedInput.context().getRequest(),
         syncedInput.values());
+    if (inheritErrors)
+    {
+      inheritErrors();
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  protected void inheritErrors()
+  {
+    Optional.ofNullable(syncedInput.errors())
+        .ifPresent(errors -> errors.forEach(super::addError));
+
+    Optional.ofNullable(syncedInput.erroredElements())
+        .ifPresent(erroredElements -> {
+          erroredElements.forEach((name, error) -> {
+            List<String> errors;
+            if (error instanceof List)
+            {
+              errors = (List<String>) error;
+            }
+            else
+            {
+              errors = Collections.singletonList((String) error);
+            }
+            errors.forEach(errorMessage ->
+                super.addErrorElement(name, errorMessage, true));
+          });
+        });
   }
 
   @Override

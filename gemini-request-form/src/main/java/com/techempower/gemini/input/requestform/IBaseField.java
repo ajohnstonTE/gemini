@@ -59,7 +59,7 @@ public interface IBaseField<T>
    *   Note: No longer sure if this is possible. If setFrom(Input)
    *   is moved to IField, then it is. But I don't want that. I think
    *   this is a better option. But it should probably be a protected
-   *   method in AbstractField so that it can be used internally only.
+   *   method in Field so that it can be used internally only.
    *
    * To be used during validation. Gets the value for the field using the given
    * input and its value access.

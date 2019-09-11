@@ -30,6 +30,13 @@ public abstract class ExtendableBaseField<T, S extends ExtendableBaseField<T, S>
   }
 
   @Override
+  public <V> S addDerivedField(IDerivedField<T, V> derivedField)
+  {
+    super.addDerivedField(derivedField);
+    return self();
+  }
+
+  @Override
   public S setRequired(boolean required)
   {
     super.setRequired(required);

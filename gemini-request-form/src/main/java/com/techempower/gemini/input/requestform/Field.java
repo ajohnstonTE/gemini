@@ -18,12 +18,12 @@ import java.util.function.Function;
 public abstract class Field<T>
     implements IField<T>
 {
-  private List<DerivedField<T, ?>> derivedFields;
-  private List<Validator>          customValidators;
-  private boolean                  required;
-  private T                        value;
-  private T                        defaultOnProcess;
-  private SyncedInput              input;
+  private List<IDerivedField<T, ?>> derivedFields;
+  private List<Validator>           customValidators;
+  private boolean                   required;
+  private T                         value;
+  private T                         defaultOnProcess;
+  private SyncedInput               input;
 
   protected Field()
   {
@@ -39,13 +39,24 @@ public abstract class Field<T>
   }
 
   @Override
+  public <V> IField<T> addDerivedField(IDerivedField<T, V> derivedField)
+  {
+    List<IDerivedField<T, ?>> derivedFields = getDerivedFields();
+    if (!derivedFields.contains(derivedField))
+    {
+      derivedFields.add(derivedField);
+    }
+    return this;
+  }
+
+  @Override
   public Field<T> addValidator(Validator validator)
   {
     getCustomValidators().add(validator);
     return this;
   }
 
-  protected List<DerivedField<T, ?>> getDerivedFields()
+  protected List<IDerivedField<T, ?>> getDerivedFields()
   {
     return derivedFields;
   }
@@ -66,18 +77,14 @@ public abstract class Field<T>
   }
 
   /**
-   * Processes any/all fields derived from this one iff this field passed
-   * validation. The input provided to the derived fields is the one processed
-   * by this one.
+   * Processes any/all fields derived from this one. The input provided to the
+   * derived fields is the one processed by this one.
    *
    * @param input the input to process
    */
-  protected void processDerivedIfValid(Input input)
+  protected void processDerived(Input input)
   {
-    if (input.passed())
-    {
-      getDerivedFields().forEach(derivedField -> derivedField.process(input));
-    }
+    getDerivedFields().forEach(derivedField -> derivedField.process(input));
   }
 
   @Override
@@ -144,16 +151,31 @@ public abstract class Field<T>
     return this.input;
   }
 
+  protected void setInput(SyncedInput input)
+  {
+    this.input = input;
+  }
+
+  protected SyncedInput createSyncedInput(Input input)
+  {
+    return new SyncedInput(input, false);
+  }
+
+  protected void processSelf(SyncedInput syncedInput)
+  {
+    getValidators().forEach(validator -> validator.process(syncedInput));
+    setValue(getValueFrom(syncedInput));
+  }
+
   @Override
   public void process(Input input)
   {
     // Note: It doesn't really need query here, just the validation.
     // TODO: I don't know what I was talking about in the above comment.
-    SyncedInput syncedInput = new SyncedInput(input);
+    SyncedInput syncedInput = createSyncedInput(input);
     // TODO: This should eventually just be Validation, not the whole Input.
-    this.input = syncedInput;
-    getValidators().forEach(validator -> validator.process(syncedInput));
-    setValue(getValueFrom(syncedInput));
-    processDerivedIfValid(syncedInput);
+    setInput(syncedInput);
+    processSelf(syncedInput);
+    processDerived(syncedInput);
   }
 }

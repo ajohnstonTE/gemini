@@ -84,33 +84,12 @@ public class RequestForm
     ValidatorSet validatorSet = new ValidatorSet(
         customValidators().toArray(new Validator[0]));
     Input formInput = validatorSet.process(context);
-    getFields()
-        .forEach(field -> {
-          // TODO: Account for the fact that some derived fields might
-          //  *somehow* be added before their source fields (probably not
-          //  possible).
-          // TODO: Eventually, find a way to not do this by type-checking each
-          if (field instanceof DerivedField)
-          {
-            // TODO: The way this is written, a derived field that is dependent
-            //  on another derived field will be processed if the root source
-            //  field did not pass validation because the middle derived field
-            //  will not have been evaluated. Address this.
-            DerivedField derivedField = (DerivedField)field;
-            if (derivedField.getSource().input().passed())
-            {
-              field.process(formInput);
-            }
-          }
-          else
-          {
-            field.process(formInput);
-          }
-        });
+    getFields().forEach(field -> field.process(formInput));
     //setValuesFromQuery(context.query());
     return formInput;
   }
 
+  @Deprecated
   @Override
   public void setValuesFromQuery(Query query)
   {

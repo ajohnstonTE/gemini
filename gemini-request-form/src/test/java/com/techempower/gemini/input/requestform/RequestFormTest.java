@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static com.techempower.gemini.ContextTestHelper.context;
 import static org.junit.jupiter.api.Assertions.*;
@@ -310,10 +311,21 @@ public class RequestFormTest
   @Test
   void testPerFieldValidation()
   {
+    class LocalDateField
+        extends DerivedField<String, LocalDate>
+    {
+      public LocalDateField(IRequestForm form, String name)
+      {
+        super(new BaseField<>(form, name, String.class)
+                .addFieldValidator(new TryCatchValidator<>(LocalDate::parse, "`%s` is not a valid date")),
+            LocalDate::parse);
+      }
+    }
     class TestForm extends RequestForm
     {
       Field<String> rawDate = new BaseField<>(this, "date", String.class)
           .addFieldValidator(new TryCatchValidator<>(LocalDate::parse, "`%s` is not a valid date"));
+      Field<LocalDate> customFormClassDate = new LocalDateField(this, "date");
       Field<String> sortA = new BaseField<>(this, "sort", String.class)
           .addValidator(new Uppercase("sort"));
       Field<String> sortB = new BaseField<>(this, "sort", String.class);
@@ -324,6 +336,7 @@ public class RequestFormTest
           .append("date", "2019-01-003")));
       assertTrue(input.failed());
       assertTrue(form.rawDate.input().failed());
+      assertTrue(form.customFormClassDate.input().failed());
       assertTrue(form.sortA.input().passed());
       assertTrue(form.sortB.input().passed());
     }
@@ -333,6 +346,16 @@ public class RequestFormTest
           .append("sort", "asc")));
       assertEquals("ASC", form.sortA.getValue());
       assertEquals("asc", form.sortB.getValue());
+    }
+    {
+      TestForm form = new TestForm();
+      Input input = form.process(context(new SimParameters()
+          .append("date", "2019-01-03")));
+      assertTrue(input.passed());
+      assertTrue(form.rawDate.input().passed());
+      assertTrue(form.customFormClassDate.input().passed());
+      assertEquals("2019-01-03", form.rawDate.getValue());
+      assertEquals(LocalDate.of(2019, 1, 3), form.customFormClassDate.getValue());
     }
   }
 }

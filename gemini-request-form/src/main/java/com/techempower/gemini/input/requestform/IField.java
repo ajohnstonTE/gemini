@@ -151,4 +151,10 @@ public interface IField<T>
   T getValueFrom(Input input);
 
   <V> IDerivedField<T, V> derive(Function<T, V> derivation);
+
+  /**
+   * Mainly intended for use within declared derived classes. For on-the-fly
+   * derivation, just use {@link #derive(Function)}.
+   */
+  <V> IField<T> addDerivedField(IDerivedField<T, V> derivedField);
 }

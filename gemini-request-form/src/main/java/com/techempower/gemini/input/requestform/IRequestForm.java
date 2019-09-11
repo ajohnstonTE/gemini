@@ -42,6 +42,7 @@ public interface IRequestForm
    *
    * @param query the source from which to set the values of the fields in this form
    */
+  @Deprecated
   void setValuesFromQuery(Query query);
   
   /**

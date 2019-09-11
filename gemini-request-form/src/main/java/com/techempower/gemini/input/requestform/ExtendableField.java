@@ -1,11 +1,6 @@
 package com.techempower.gemini.input.requestform;
 
-import com.techempower.gemini.input.Input;
-import com.techempower.gemini.input.Values;
 import com.techempower.gemini.input.validator.Validator;
-
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 public abstract class ExtendableField<T, S extends ExtendableField<T, S>>
   extends Field<T>
@@ -21,6 +16,13 @@ public abstract class ExtendableField<T, S extends ExtendableField<T, S>>
   public S addFieldValidator(IFieldValidator<T> fieldValidator)
   {
     super.addFieldValidator(fieldValidator);
+    return self();
+  }
+
+  @Override
+  public <V> S addDerivedField(IDerivedField<T, V> derivedField)
+  {
+    super.addDerivedField(derivedField);
     return self();
   }
 
