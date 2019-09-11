@@ -30,7 +30,7 @@ public abstract class FieldValidator<T>
   }
 
   /**
-   * @param field - the field to associate with
+   * @param field the field to associate with
    */
   private void setField(IField<T> field)
   {

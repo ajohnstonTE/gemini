@@ -64,7 +64,7 @@ public interface IBaseField<T>
    * To be used during validation. Gets the value for the field using the given
    * input and its value access.
    *
-   * @param input - the input to get the value from
+   * @param input the input to get the value from
    * @return the value derived from input using the value accessor.
    */
   default T getValueFrom(Input input)

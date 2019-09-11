@@ -103,7 +103,7 @@ public interface IField<T>
    * Sets the default value to set the field to during processing if no value
    * is provided (null by default).
    *
-   * @param defaultOnProcess - the default value to use
+   * @param defaultOnProcess the default value to use
    */
   IField<T> setDefaultOnProcess(T defaultOnProcess);
   

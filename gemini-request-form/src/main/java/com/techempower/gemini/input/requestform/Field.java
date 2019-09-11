@@ -70,7 +70,7 @@ public abstract class Field<T>
    * validation. The input provided to the derived fields is the one processed
    * by this one.
    *
-   * @param input - the input to process
+   * @param input the input to process
    */
   protected void processDerivedIfValid(Input input)
   {
