@@ -43,6 +43,12 @@ public class SelectField<T>
   {
     return addOption(value, value);
   }
+
+  // TODO: Add method that lets you generate the options with the context
+  //  supplied. Would require that the form be provided the form after
+  //  initialization though, which is unideal. It would be required in
+  //  those cases anyways, it just wouldn't be as obvious, which isn't
+  //  exactly ideal.
   
   public List<Option> getOptions()
   {

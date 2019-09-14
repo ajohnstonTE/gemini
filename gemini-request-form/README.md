@@ -136,8 +136,7 @@ and validating nested JSON objects will be added. Example:
 ```java
 class DeconstructingJsonHandler extends MethodUriHandler<Context>
 {
-  /* NestedField would implement both IRequestForm and IField */
-  class ActionData extends NestedField 
+  class ActionData extends RequestForm 
   {
     Field<long[]> entityIds = new BaseField<>(this, "entity-ids", long[].class);
     Field<Boolean> delete = new BaseField<>(this, "delete", Boolean.class);
@@ -146,7 +145,17 @@ class DeconstructingJsonHandler extends MethodUriHandler<Context>
   class ExampleForm extends RequestForm
   {
     Field<String> someText = new BaseField<>(this, "some-text", String.class);
-    ActionData actionData = new ActionData(this, "action-data");
+    NestedField<ActionData> actionData = new NestedField<>(this, "action-data", ActionData.class);
+    // A possible alternate approach that would avoid some .getValue()'s:
+    ActionData actionData = nested("action-data", ActionData.class);
+   // In the above, `nested` would be a protected method in RequestForm.
+   // It could probably also accept a field validator as an optional 3rd 
+   // argument to add things like RequiredFieldValidator. Problem is, with 
+   // the above syntax you might think to instead do:
+   ActionData actionDataWrong = nested("action-data", ActionData.class)
+       .addValidator(new RequiredValidator("action-data"));
+   // which would be wrong because it would be looking for the property 
+   // action-data.action-data, not the top-level action-data. 
   }
 
   @Path("request-form")
@@ -154,8 +163,8 @@ class DeconstructingJsonHandler extends MethodUriHandler<Context>
   public boolean handleRequestForm(ExampleForm form)
   {
     String someText = form.someText.getValue();
-    long[] entityIds = form.actionData.entityIds.getValue();
-    boolean delete = form.actionData.delete.getValue();
+    long[] entityIds = form.actionData.getValue().entityIds.getValue();
+    boolean delete = form.actionData.getValue().delete.getValue();
   }
 }
 ``` 
