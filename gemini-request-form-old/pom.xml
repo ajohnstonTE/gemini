@@ -18,8 +18,8 @@
     </license>
   </licenses>
 
-  <artifactId>gemini-request-form</artifactId>
-  <name>gemini-request-form</name>
+  <artifactId>gemini-request-form-old</artifactId>
+  <name>gemini-request-form-old</name>
   <description>
     An extension to Techempower's Gemini framework for http request parameter evaluation.
   </description>
