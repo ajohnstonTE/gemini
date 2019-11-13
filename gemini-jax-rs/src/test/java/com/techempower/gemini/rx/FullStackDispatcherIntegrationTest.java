@@ -7,9 +7,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -69,11 +67,11 @@ public class FullStackDispatcherIntegrationTest
     }
   }
 
-  Infrastructure infrastructure;
-  HttpClient client;
+  static Infrastructure infrastructure;
+  static HttpClient client;
 
-  @BeforeEach
-  void setUp() throws ExecutionException, InterruptedException
+  @BeforeAll
+  static void setUp() throws ExecutionException, InterruptedException
   {
     infrastructure = new Infrastructure();
     CompletableFuture<?> future = new CompletableFuture<>();
@@ -84,8 +82,8 @@ public class FullStackDispatcherIntegrationTest
         .build();
   }
 
-  @AfterEach
-  void tearDown()
+  @AfterAll
+  static void tearDown()
   {
     infrastructure.getApplication().end();
   }
