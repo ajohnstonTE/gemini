@@ -17,49 +17,17 @@ import com.techempower.log.ComponentLog;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
-class JaxRsDispatcherTest
+public class StandardDispatchTest
 {
-
-  @Test
-  void dispatch()
-  {
-    ExampleResource exampleResource = new ExampleResource();
-    assertEquals("Hello, World!", exampleResource.doTest());
-    assertEquals("Hello, World! num: 5", exampleResource.doTest2(5));
-  }
-
-  @Path("example")
-  public static class ExampleResource
-  {
-    @Path("test")
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String doTest()
-    {
-      return "Hello, World!";
-    }
-
-    @Path("test2")
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String doTest2(@QueryParam("num") Integer num)
-    {
-      return "Hello, World! num: " + num;
-    }
-  }
-
   @Test
   void dispatchTestTypical()
   {
@@ -74,9 +42,9 @@ class JaxRsDispatcherTest
 
     PathDispatcher<GeminiApplication, Context> pathDispatcher =
         new PathDispatcher<>(application, new PathDispatcher.Configuration<>()
-            .add("example", new ExampleHandler(application))
+            .add("example", new JaxRsDispatcherTest.ExampleHandler(application))
             .add(new LoggingExceptionHandler(application)));
-    Simulation simulation = new StandardSimulation()
+    Simulation simulation = new JaxRsDispatcherTest.StandardSimulation()
     {
       @Override
       public GeminiApplication getApplication()
@@ -85,8 +53,8 @@ class JaxRsDispatcherTest
       }
     };
     {
-      SpyAwareContext context = spy(new SpyAwareContext(application,
-          new AnotherGetSimRequest(
+      JaxRsDispatcherTest.SpyAwareContext context = spy(new JaxRsDispatcherTest.SpyAwareContext(application,
+          new JaxRsDispatcherTest.AnotherGetSimRequest(
               simulation,
               "example/test",
               new HashMap<>(),
@@ -99,8 +67,8 @@ class JaxRsDispatcherTest
       assertEquals("Hello, World!", argument.getValue());
     }
     {
-      SpyAwareContext context = spy(new SpyAwareContext(application,
-          new AnotherGetSimRequest(
+      JaxRsDispatcherTest.SpyAwareContext context = spy(new JaxRsDispatcherTest.SpyAwareContext(application,
+          new JaxRsDispatcherTest.AnotherGetSimRequest(
               simulation,
               "example/test2",
               new HashMap<String, String>()
@@ -112,57 +80,6 @@ class JaxRsDispatcherTest
       context.setUp(context);
       ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
       pathDispatcher.dispatch(context);
-      verify(context).print(argument.capture());
-      assertEquals("Hello, World! num: 5", argument.getValue());
-    }
-  }
-
-  @Test
-  void dispatchTestTypical2()
-  {
-    // This is another painful approach to testing an endpoint. This is how you
-    // test it "directly".
-    GeminiApplication application = mockedApp();
-    ExampleHandler exampleHandler = new ExampleHandler(application);
-    Simulation simulation = new StandardSimulation()
-    {
-      @Override
-      public GeminiApplication getApplication()
-      {
-        return application;
-      }
-    };
-    {
-      SpyAwareContext context = spy(new SpyAwareContext(application,
-          new AnotherGetSimRequest(
-              simulation,
-              "example/test",
-              new HashMap<>(),
-              new SimClient(1),
-              application)));
-      context.setUp(context);
-      ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-      exampleHandler.doTest();
-      verify(context).print(argument.capture());
-      assertEquals("Hello, World!", argument.getValue());
-    }
-    {
-      SpyAwareContext context = spy(new SpyAwareContext(application,
-          new AnotherGetSimRequest(
-              simulation,
-              "example/test2",
-              new HashMap<String, String>()
-              {{
-                put("num", "5");
-              }},
-              new SimClient(1),
-              application)));
-      // It can't just pass in "this" in an initializer block because
-      // that would refer to the non-spied context. It has to be the spied
-      // one in order to be captured.
-      context.setUp(context);
-      ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
-      exampleHandler.doTest2();
       verify(context).print(argument.capture());
       assertEquals("Hello, World! num: 5", argument.getValue());
     }
@@ -222,9 +139,9 @@ class JaxRsDispatcherTest
     }
 
     @Override
-    public HttpMethod getRequestMethod()
+    public Request.HttpMethod getRequestMethod()
     {
-      return HttpMethod.GET;
+      return Request.HttpMethod.GET;
     }
   }
 
