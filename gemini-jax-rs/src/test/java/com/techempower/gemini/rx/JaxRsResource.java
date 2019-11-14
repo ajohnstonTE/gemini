@@ -1,9 +1,9 @@
 package com.techempower.gemini.rx;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import com.techempower.gemini.params.Person;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 
 @Path("foo2")
 public class JaxRsResource
@@ -34,5 +34,26 @@ public class JaxRsResource
   public String handleBar4(@PathParam("animal") String theAnimal)
   {
     return "Hello, World!" + theAnimal;
+  }
+
+  @Path("bar5")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.TEXT_PLAIN)
+  @POST
+  public String handleBar5(Person param)
+  {
+    return "Hello, World!" + param;
+  }
+
+  @Path("bar6")
+  @Produces(MediaType.APPLICATION_JSON)
+  @GET
+  public Person handleBar6()
+  {
+    return new Person()
+        .setId(7)
+        .setName("Bob Seger")
+        .setAge(63)
+        .setAbbr("BS");
   }
 }

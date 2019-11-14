@@ -6,6 +6,7 @@ import com.techempower.gemini.*;
 import com.techempower.gemini.params.Parameters;
 import com.techempower.gemini.path.PathDispatcher;
 import com.techempower.util.EnhancedProperties;
+import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.jboss.resteasy.core.SynchronousDispatcher;
 import org.jboss.resteasy.core.SynchronousExecutionContext;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
@@ -116,6 +117,7 @@ public class TestApplication
         deployment.setProviderFactory(providerFactory);
         providerFactory.setRegisterBuiltins(true);
         RegisterBuiltin.register(providerFactory);
+        providerFactory.registerProvider(JacksonJsonProvider.class);
         providerFactory.setBuiltinsRegistered(true);
         deployment.setRegistry(restEasyDispatcher.getRegistry());
         deployment.registration();

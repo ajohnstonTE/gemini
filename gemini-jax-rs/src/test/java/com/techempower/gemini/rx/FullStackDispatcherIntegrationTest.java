@@ -6,12 +6,15 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.jupiter.api.*;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -174,6 +177,26 @@ public class FullStackDispatcherIntegrationTest
     assertEquals(
         "Hello, World!cat",
         execute(RequestBuilder.get("http://localhost:8080/foo2/bar4/cat/more"))
+    );
+  }
+
+  @Test
+  void jaxRxResourceWithJsonParam() throws IOException
+  {
+    assertEquals(
+        "Hello, World!Person{id=4, name='Sa Mantha', age=38, abbr='SM'}",
+        execute(RequestBuilder.post("http://localhost:8080/foo2/bar5")
+            .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+            .setEntity(new StringEntity("{\"id\":4,\"name\":\"Sa Mantha\",\"age\":38,\"abbr\":\"SM\"}")))
+    );
+  }
+
+  @Test
+  void jaxRxResourceReturnsJson() throws IOException
+  {
+    assertEquals(
+        "{\"id\":7,\"name\":\"Bob Seger\",\"age\":63,\"abbr\":\"BS\"}",
+        execute(RequestBuilder.get("http://localhost:8080/foo2/bar6"))
     );
   }
 }
