@@ -24,9 +24,9 @@
   </parent>
 
   <groupId>com.techempower</groupId>
-  <artifactId>gemini-resin-legacy-dispatching</artifactId>
+  <artifactId>gemini-jax-rs</artifactId>
   <description>
-    An extension for Gemini that provides the old request dispatching functionality for Resin.
+    An extension for Gemini that provides dispatching implemented as a subset of JAX-RS.
   </description>
 
   <dependencies>
@@ -35,28 +35,8 @@
       <artifactId>gemini</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.techempower</groupId>
-      <artifactId>gemini-resin</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.techempower</groupId>
-      <artifactId>gemini-legacy-dispatching</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.caucho</groupId>
-      <artifactId>resin</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax</groupId>
-      <artifactId>javaee-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax</groupId>
-      <artifactId>javaee-web-api</artifactId>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -67,6 +47,19 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!--
+        TODO: Remove this once performance testing is done, or can be done from the unit tests
+              where this can be a test dependency
+      -->
+      <groupId>com.caucho</groupId>
+      <artifactId>resin</artifactId>
+      <optional>false</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
     </dependency>
   </dependencies>
 

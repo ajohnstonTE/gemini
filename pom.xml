@@ -48,6 +48,7 @@
     <module>gemini-log4j2</module>
     <module>gemini-logback</module>
     <module>gemini-log4j12</module>
+    <module>gemini-jax-rs</module>
     <module>gemini-legacy-dispatching</module>
     <module>gemini-resin-legacy-dispatching</module>
   </modules>
@@ -91,6 +92,9 @@
     <flyway.version>6.0.0</flyway.version>
     <log4j2.version>2.13.0</log4j2.version>
     <logback.version>1.3.0-alpha2</logback.version>
+    <jax-rs.version>2.1.6</jax-rs.version>
+    <caffeine.version>2.8.1</caffeine.version>
+    <mockito.version>1.10.19</mockito.version>
   </properties>
 
   <scm>
@@ -251,6 +255,11 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>${jax-rs.version}</version>
+      </dependency>
+      <dependency>
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-impl</artifactId>
         <version>${jsonwebtoken.version}</version>
@@ -305,6 +314,17 @@
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-core</artifactId>
         <version>${flyway.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.ben-manes.caffeine</groupId>
+        <artifactId>caffeine</artifactId>
+        <version>${caffeine.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
