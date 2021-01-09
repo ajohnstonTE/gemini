@@ -47,6 +47,16 @@ public class YamlSourcePluginTest
                 "\"threads\": 4 " +
                 "}",
         },
+        new Object[]{
+            String.join(",", new String[]{
+                "config-test/merge-test.yml",
+            }),
+            // language=JSON
+            "{ " +
+                "\"description\": \"App D\", " +
+                "\"threads\": 8 " +
+                "}",
+        },
     };
   }
 
@@ -62,8 +72,18 @@ public class YamlSourcePluginTest
     ObjectNode root = mapper.createObjectNode();
     for (String source : sources.split(","))
     {
+      FileOrClassPathReader sourceLoader = new FileOrClassPathReader()
+      {
+        @Override
+        public ObjectNode loadFromFileOrClassPath(ObjectNode to,
+                                                  FileSource from) throws Exception
+        {
+          return new YamlSourcePlugin().load(to, from
+              .readFromSystemOrClassPath(), new ExtendsLoader(this));
+        }
+      };
       root = new YamlSourcePlugin().load(root, new FileSource(source)
-          .readFromSystemOrClassPath(), null);
+          .readFromSystemOrClassPath(), new ExtendsLoader(sourceLoader));
     }
     assertEquals(mapper.readTree(expected), root);
   }

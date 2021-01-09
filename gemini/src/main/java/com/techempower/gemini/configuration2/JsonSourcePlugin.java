@@ -43,6 +43,7 @@ public class JsonSourcePlugin
     {
       throw new Exception("JSON configuration files must be an object.");
     }
+    JsonSourcePlugin.loadMerges(root, jsonNode, extendsLoader);
     root.setAll((ObjectNode) jsonNode);
     return root;
   }
@@ -50,5 +51,26 @@ public class JsonSourcePlugin
   protected static ObjectMapper getDefaultObjectMapper()
   {
     return new ObjectMapper();
+  }
+
+  static void loadMerges(ObjectNode root,
+                         JsonNode jsonNode,
+                         ExtendsLoader extendsLoader) throws Exception
+  {
+    ObjectNode objectNode = (ObjectNode) jsonNode;
+    JsonNode merges = objectNode.get("merges");
+    if (merges != null && (merges.isArray() || merges.isTextual())) {
+      if (merges.isArray()) {
+        for (JsonNode merge : merges)
+        {
+          if (merge != null && merge.isTextual()) {
+            extendsLoader.loadExtends(root, merge.textValue());
+          }
+        }
+      } else {
+        extendsLoader.loadExtends(root, merges.textValue());
+      }
+      objectNode.remove("merges");
+    }
   }
 }

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ExtendsLoader
 {
-  private final ConfigurationSourceLoader sourceLoader;
+  private final FileOrClassPathReader sourceLoader;
 
-  public ExtendsLoader(ConfigurationSourceLoader sourceLoader)
+  public ExtendsLoader(FileOrClassPathReader sourceLoader)
   {
     this.sourceLoader = sourceLoader;
   }

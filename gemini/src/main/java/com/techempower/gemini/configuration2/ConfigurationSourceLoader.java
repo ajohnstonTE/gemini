@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.util.Optional;
 
 public class ConfigurationSourceLoader
-    implements ConfigurationLoader
+    implements ConfigurationLoader, FileOrClassPathReader
 {
   private final Logger                      log = LoggerFactory.getLogger(getClass());
   private final String                      configSources;
@@ -82,8 +82,9 @@ public class ConfigurationSourceLoader
         + contentType);
   }
 
-  protected ObjectNode loadFromFileOrClassPath(ObjectNode node,
-                                               FileSource source)
+  @Override
+  public ObjectNode loadFromFileOrClassPath(ObjectNode node,
+                                            FileSource source)
       throws Exception
   {
     log.trace("Preparing to read from file {}", source);

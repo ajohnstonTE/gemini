@@ -116,8 +116,18 @@ public class ConfSourcePluginTest
     ObjectNode root = mapper.createObjectNode();
     for (String source : sources.split(","))
     {
+      FileOrClassPathReader sourceLoader = new FileOrClassPathReader()
+      {
+        @Override
+        public ObjectNode loadFromFileOrClassPath(ObjectNode to,
+                                                  FileSource from) throws Exception
+        {
+          return new ConfSourcePlugin().load(to, from
+              .readFromSystemOrClassPath(), new ExtendsLoader(this));
+        }
+      };
       root = new ConfSourcePlugin().load(root, new FileSource(source)
-          .readFromSystemOrClassPath(), null);
+          .readFromSystemOrClassPath(), new ExtendsLoader(sourceLoader));
     }
     assertEquals(mapper.readTree(expected), root);
   }

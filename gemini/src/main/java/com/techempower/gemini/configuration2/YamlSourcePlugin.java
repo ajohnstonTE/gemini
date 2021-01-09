@@ -45,6 +45,7 @@ public class YamlSourcePlugin
     {
       throw new Exception("YAML configuration files must be an object.");
     }
+    JsonSourcePlugin.loadMerges(root, jsonNode, extendsLoader);
     root.setAll((ObjectNode) jsonNode);
     return root;
   }
